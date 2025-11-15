@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client Settings · Le Bara 2025</title>
+  <style>
+    :root{
+      --bg:#06070b;--surface:#10121a;--card:#161922;--border:#212838;--text:#f5f8ff;--muted:#94a3b8;--accent:#24cfff;--accent2:#0079ff;--accent3:#8c34ff;--accent4:#ff4fa3;--accent-grad:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 30%,var(--accent3) 65%,var(--accent4) 100%);--radius:14px;--radius-sm:9px;--shadow:0 6px 28px rgba(0,0,0,.45);--space:16px;--space-sm:10px;--space-lg:26px;
+    }
+    *{box-sizing:border-box;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    body{margin:0;background:linear-gradient(160deg,#06070b 0%,#0e1118 60%,#181c29 100%);color:var(--text);padding:clamp(12px,2.5vw,28px);}
+    h1{margin:0 0 4px;font-size:1.5rem;font-weight:800;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    p{margin:0 0 18px;color:var(--muted);}
+    .grid{display:grid;gap:var(--space);grid-template-columns:1fr;max-width:980px;margin:0 auto;}
+    @media(min-width:760px){.grid{grid-template-columns:1fr 1fr;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--space);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:var(--space-sm);}
+    label{font-size:.75rem;letter-spacing:.5px;font-weight:600;text-transform:uppercase;color:var(--muted);}
+    input,textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-size:.95rem;}
+    textarea{resize:vertical;min-height:120px;}
+    input:focus,textarea:focus{outline:2px solid var(--accent3);}
+    .row{display:flex;gap:10px;flex-wrap:wrap;}
+    .btn{cursor:pointer;border:none;border-radius:var(--radius-sm);padding:12px 18px;font-weight:600;background:var(--card);color:var(--text);transition:.18s;display:inline-flex;align-items:center;gap:8px;font-size:.9rem;}
+    .btn.primary{background:var(--accent-grad);color:#fff;}
+    .btn.danger{background:#ff4f4f;color:#fff;}
+    .btn:hover{transform:translateY(-2px);}
+    .preview{display:flex;align-items:center;gap:14px;margin-top:8px;}
+    .logo-box{width:64px;height:64px;border-radius:16px;overflow:hidden;background:var(--accent-grad);display:grid;place-items:center;border:1px solid var(--border);}
+    .logo-box img{width:100%;height:100%;object-fit:cover;}
+    small{color:var(--muted);font-size:.7rem;}
+    .inline{display:flex;align-items:center;gap:8px;}
+    .pill{background:var(--card);border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:.65rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+    .section-title{font-size:.85rem;font-weight:700;letter-spacing:.5px;margin:4px 0;color:var(--accent);}
+    .footer{margin-top:34px;text-align:center;font-size:.65rem;color:var(--muted);}
+    .split{display:grid;gap:var(--space-sm);grid-template-columns:1fr 1fr;}
+    @media(max-width:620px){.split{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <h1>Configuration Client</h1>
+  <p>Modifiez ces constantes pour adapter rapidement la boutique à un autre client (nom, identité, couleurs, logo, contact...). Sauvegarde sur disque via l'API interne.</p>
+
+  <form id="clientForm" class="grid">
+    <div class="card">
+      <div class="section-title">Identité</div>
+      <label for="title">Titre / Nom de la boutique</label>
+      <input id="title" name="title" placeholder="LE BARA 2025" required />
+      <label for="subtitle">Sous-titre</label>
+      <input id="subtitle" name="subtitle" placeholder="Catalogue officiel" />
+      <label for="accent">Couleur accent principale</label>
+      <input id="accent" name="accent" type="color" value="#24cfff" />
+      <div class="split">
+        <div>
+          <label for="accent2">Accent 2</label>
+          <input id="accent2" name="accent2" type="color" value="#0079ff" />
+        </div>
+        <div>
+          <label for="accent3">Accent 3</label>
+          <input id="accent3" name="accent3" type="color" value="#8c34ff" />
+        </div>
+      </div>
+      <label for="accent4">Accent 4</label>
+      <input id="accent4" name="accent4" type="color" value="#ff4fa3" />
+      <label for="logoUrl">Logo (URL)</label>
+      <input id="logoUrl" name="logoUrl" placeholder="https://cdn.exemple.com/logo.png" />
+      <div class="preview">
+        <div class="logo-box" id="logoPreview"><span style="font-size:.6rem;opacity:.7">Aperçu</span></div>
+        <div style="flex:1">
+          <small>Mettez une URL directe. Les images locales ne peuvent pas être chargées sans build.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Contact & Message</div>
+      <label for="telegram">Telegram (username sans @)</label>
+      <input id="telegram" name="telegram" placeholder="MonShopCBD" />
+      <label for="buttonText">Texte du bouton principal</label>
+      <input id="buttonText" name="buttonText" placeholder="Préparer message" />
+      <label for="messageTemplate">Template message</label>
+      <textarea id="messageTemplate" name="messageTemplate" placeholder="Bonjour, je suis intéressé par {{name}} (ID {{id}}) au prix de {{price}}."></textarea>
+      <small>Placeholders: {{name}} {{id}} {{price}} {{tier}} {{tierPrice}}</small>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Multi-client</div>
+      <label for="clientSlug">Slug client (facultatif)</label>
+      <input id="clientSlug" name="clientSlug" placeholder="bara2025" />
+      <small>Si renseigné, écrit la config dans clients/&lt;slug&gt;/config.json</small>
+      <div class="section-title">Actions</div>
+      <div class="row">
+        <button type="submit" class="btn primary">💾 Sauvegarder</button>
+        <button type="button" id="btnExport" class="btn">⬇️ Export JSON</button>
+        <button type="button" id="btnImport" class="btn">📥 Import JSON</button>
+        <input id="fileImport" type="file" accept="application/json" style="display:none" />
+      </div>
+      <div id="status" class="pill" style="margin-top:8px">Prêt</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">JSON actuel</div>
+      <textarea id="jsonOut" readonly style="min-height:240px;font-family:monospace;font-size:.75rem"></textarea>
+    </div>
+  </form>
+
+  <div class="footer">Client Settings · v1 — API /api/config (POST). Palette dynamique appliquée après sauvegarde.</div>
+
+  <script>
+    const els = {
+      form: document.getElementById('clientForm'),
+      logoUrl: document.getElementById('logoUrl'),
+      logoPreview: document.getElementById('logoPreview'),
+      accent: document.getElementById('accent'),
+      accent2: document.getElementById('accent2'),
+      accent3: document.getElementById('accent3'),
+      accent4: document.getElementById('accent4'),
+      telegram: document.getElementById('telegram'),
+      buttonText: document.getElementById('buttonText'),
+      messageTemplate: document.getElementById('messageTemplate'),
+      title: document.getElementById('title'),
+      subtitle: document.getElementById('subtitle'),
+      clientSlug: document.getElementById('clientSlug'),
+      status: document.getElementById('status'),
+      jsonOut: document.getElementById('jsonOut'),
+      btnExport: document.getElementById('btnExport'),
+      btnImport: document.getElementById('btnImport'),
+      fileImport: document.getElementById('fileImport'),
+    };
+
+    function updatePreview(){
+      const url = els.logoUrl.value.trim();
+      if(url){
+        els.logoPreview.innerHTML = `<img src="${url}" alt="Logo" />`;
+      } else {
+        els.logoPreview.innerHTML = '<span style="font-size:.6rem;opacity:.7">Aperçu</span>';
+      }
+    }
+    els.logoUrl.addEventListener('input', updatePreview);
+
+    function buildConfig(){
+      return {
+        title: els.title.value.trim(),
+        subtitle: els.subtitle.value.trim(),
+        accent: els.accent.value,
+        theme: {
+          accent2: els.accent2.value,
+          accent3: els.accent3.value,
+          accent4: els.accent4.value
+        },
+        contact: { telegram: els.telegram.value.trim() },
+        buttonText: els.buttonText.value.trim(),
+        messageTemplate: els.messageTemplate.value.trim(),
+        logo: els.logoUrl.value.trim() || null
+      };
+    }
+
+    function refreshJSON(){
+      els.jsonOut.value = JSON.stringify(buildConfig(), null, 2);
+    }
+    ['input','change'].forEach(evt=> els.form.addEventListener(evt, refreshJSON));
+    refreshJSON();
+
+    els.form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const cfg = buildConfig();
+      const slug = els.clientSlug.value.trim().toLowerCase();
+      els.status.textContent = '⏳ Sauvegarde...';
+      try {
+        const res = await fetch('/api/config' + (slug?`?client=${encodeURIComponent(slug)}`:''), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cfg)});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        els.status.textContent = '✅ Config enregistrée';
+        // Appliquer palette live
+        applyTheme(cfg);
+      } catch(err){
+        console.error(err);
+        els.status.textContent = '❌ Erreur sauvegarde';
+      }
+    });
+
+    function applyTheme(cfg){
+      if(!cfg) return;
+      const root = document.documentElement;
+      if(cfg.accent) root.style.setProperty('--accent', cfg.accent);
+      if(cfg.theme){
+        cfg.theme.accent2 && root.style.setProperty('--accent2', cfg.theme.accent2);
+        cfg.theme.accent3 && root.style.setProperty('--accent3', cfg.theme.accent3);
+        cfg.theme.accent4 && root.style.setProperty('--accent4', cfg.theme.accent4);
+      }
+      const a = getComputedStyle(root).getPropertyValue('--accent').trim();
+      root.style.setProperty('--accent-grad',`linear-gradient(135deg,${a} 0%, var(--accent2) 30%, var(--accent3) 65%, var(--accent4) 100%)`);
+    }
+
+    els.btnExport.addEventListener('click', ()=>{
+      const blob = new Blob([els.jsonOut.value], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'client-config.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    els.btnImport.addEventListener('click', ()=> els.fileImport.click());
+    els.fileImport.addEventListener('change', async ()=>{
+      const file = els.fileImport.files && els.fileImport.files[0];
+      if(!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if(json.title) els.title.value = json.title;
+        if(json.subtitle) els.subtitle.value = json.subtitle;
+        if(json.accent) els.accent.value = json.accent;
+        if(json.theme){
+          json.theme.accent2 && (els.accent2.value = json.theme.accent2);
+          json.theme.accent3 && (els.accent3.value = json.theme.accent3);
+          json.theme.accent4 && (els.accent4.value = json.theme.accent4);
+        }
+        if(json.contact && json.contact.telegram) els.telegram.value = json.contact.telegram.replace(/^@/,'');
+        if(json.buttonText) els.buttonText.value = json.buttonText;
+        if(json.messageTemplate) els.messageTemplate.value = json.messageTemplate;
+        if(json.logo) els.logoUrl.value = json.logo;
+        updatePreview();
+        refreshJSON();
+        applyTheme(json);
+        els.status.textContent = '📥 Importé';
+      } catch(e){
+        console.error(e); els.status.textContent = '⚠️ Import invalide';
+      } finally { els.fileImport.value=''; }
+    });
+  </script>
+</body>
+</html>

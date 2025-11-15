@@ -2,16 +2,19 @@
 """
 Simple HTTP server with proper routing for the CBD Shop mini-app.
 Handles routes like /admin -> admin.html
+Ajout: /client -> client-settings.html et endpoint POST /api/config
 """
 
 import http.server
 import socketserver
 import os
 import json
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs
 
 PORT = 8080
 CATALOG_FILE = 'catalog.json'
+CONFIG_ROOT_FILE = 'config.json'
+CLIENTS_DIR = 'clients'
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     """Custom handler with route rewrites and API endpoints."""
@@ -25,6 +28,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         route_map = {
             '/': '/index.html',
             '/admin': '/admin.html',
+            '/client': '/client-settings.html',  # nouvelle page de paramétrage client
         }
 
         # Check if path needs rewriting
@@ -43,38 +47,81 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = unquote(parsed_path.path)
 
         if path == '/api/catalog':
-            try:
-                # Read the content length
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
+            self._handle_catalog_post()
+            return
+        if path == '/api/config':
+            self._handle_config_post(parsed_path)
+            return
+        self.send_error(404, "API endpoint not found")
 
-                # Parse JSON
-                catalog_data = json.loads(post_data.decode('utf-8'))
+    # --- Catalog handler inchangé ---
+    def _handle_catalog_post(self):
+        try:
+            # Read the content length
+            length = int(self.headers.get('Content-Length', 0))
+            raw = self.rfile.read(length)
 
-                # Validate the data structure
-                if 'products' not in catalog_data or not isinstance(catalog_data['products'], list):
-                    self.send_error(400, "Invalid catalog format: 'products' array required")
-                    return
+            # Parse JSON
+            data = json.loads(raw.decode('utf-8'))
 
-                # Save to file
-                with open(CATALOG_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(catalog_data, f, indent=2, ensure_ascii=False)
+            # Validate the data structure
+            if 'products' not in data or not isinstance(data['products'], list):
+                self.send_error(400, "Invalid catalog format: 'products' array required")
+                return
 
-                # Send success response
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                response = json.dumps({'success': True, 'message': 'Catalog saved successfully'})
-                self.wfile.write(response.encode('utf-8'))
+            # Save to file
+            with open(CATALOG_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
 
-                print(f"✅ Catalog saved: {len(catalog_data['products'])} products")
+            # Send success response
+            self._send_json({"success": True, "message": "Catalog saved", "count": len(data['products'])})
+            print(f"✅ Catalog saved: {len(data['products'])} products")
+        except json.JSONDecodeError as e:
+            self.send_error(400, f"Invalid JSON: {e}")
+        except Exception as e:
+            self.send_error(500, f"Server error: {e}")
 
-            except json.JSONDecodeError as e:
-                self.send_error(400, f"Invalid JSON: {str(e)}")
-            except Exception as e:
-                self.send_error(500, f"Server error: {str(e)}")
-        else:
-            self.send_error(404, "API endpoint not found")
+    # --- New config handler ---
+    def _handle_config_post(self, parsed_path):
+        try:
+            # Read the content length
+            length = int(self.headers.get('Content-Length', 0))
+            raw = self.rfile.read(length)
+
+            # Parse JSON
+            cfg = json.loads(raw.decode('utf-8'))
+
+            # Validation minimale
+            if not isinstance(cfg, dict):
+                self.send_error(400, 'Config must be an object')
+                return
+
+            # Extract slug if provided (?client=slug)
+            params = parse_qs(parsed_path.query or '')
+            slug = (params.get('client', [''])[0] or '').strip().lower()
+            target_path = CONFIG_ROOT_FILE
+            if slug:
+                # Créer dossier clients/<slug>/ si multi-client demandé
+                os.makedirs(os.path.join(CLIENTS_DIR, slug), exist_ok=True)
+                target_path = os.path.join(CLIENTS_DIR, slug, 'config.json')
+
+            # Save to file
+            with open(target_path, 'w', encoding='utf-8') as f:
+                json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+            # Send success response
+            self._send_json({"success": True, "message": "Config saved", "path": target_path})
+            print(f"📝 Config saved at {target_path}")
+        except json.JSONDecodeError as e:
+            self.send_error(400, f"Invalid JSON: {e}")
+        except Exception as e:
+            self.send_error(500, f"Server error: {e}")
+
+    def _send_json(self, obj, status=200):
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(obj).encode('utf-8'))
 
     def do_OPTIONS(self):
         """Handle OPTIONS requests for CORS preflight."""
@@ -115,4 +162,3 @@ def run_server():
 
 if __name__ == "__main__":
     run_server()
-
