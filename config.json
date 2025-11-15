@@ -1,0 +1,9 @@
+{
+  "title": "CBD Shop · Démo",
+  "subtitle": "Mini‑app Telegram — catalogue de démonstration",
+  "accent": "#79c3ff",
+  "contact": { "telegram": "MonShopCBD" },
+  "buttonText": "Préparer message",
+  "messageTemplate": "Bonjour, je suis intéressé par {{name}} (ID {{id}}) — {{tier}} à {{tierPrice}}."
+}
+

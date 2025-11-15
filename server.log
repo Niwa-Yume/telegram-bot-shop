@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/niwa/PycharmProjects/telegram-mini-app-bot/server_custom.py", line 117, in <module>
+    run_server()
+  File "/Users/niwa/PycharmProjects/telegram-mini-app-bot/server_custom.py", line 100, in run_server
+    with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socketserver.py", line 473, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 48] Address already in use

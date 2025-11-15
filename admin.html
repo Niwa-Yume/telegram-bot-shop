@@ -1,0 +1,1778 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Catalogue · CBD Shop</title>
+  <style>
+    /* ===== Design System - Mobile First ===== */
+    :root{
+      --bg:#0a0a0f;
+      --surface:#12131a;
+      --surface-hover:#181925;
+      --card:#15161f;
+      --text:#f8f9fa;
+      --muted:#8b92a7;
+      --border:#1e1f2e;
+      --accent:#24cfff;
+      --accent-alt:#0079ff;
+      --accent-alt2:#8c34ff;
+      --accent-alt3:#ff4fa3;
+      --accent-grad:linear-gradient(135deg,var(--accent) 0%,var(--accent-alt) 28%,var(--accent-alt2) 60%,var(--accent-alt3) 100%);
+      --success:#4ade80;
+      --warning:#fbbf24;
+      --danger:#f87171;
+      --radius:12px;
+      --radius-sm:8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Mobile spacing (augmente sur desktop) */
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 20px;
+      --spacing-xl: 24px;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    body {
+      background: linear-gradient(135deg, var(--bg) 0%, #0d0e16 100%);
+      color: var(--text);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    /* Desktop augmentation */
+    @media (min-width: 768px) {
+      body { font-size: 15px; }
+      :root {
+        --spacing-xs: 10px;
+        --spacing-sm: 14px;
+        --spacing-md: 20px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+        --radius: 14px;
+        --radius-sm: 10px;
+      }
+    }
+
+    /* ===== Login Screen - Mobile First ===== */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height pour mobile */
+      padding: var(--spacing-md);
+      background: radial-gradient(circle at 50% 0%, rgba(109, 158, 255, 0.08) 0%, transparent 50%);
+    }
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--spacing-xl);
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .login-box h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, #9d7eff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    @media (min-width: 768px) {
+      .login-box h1 { font-size: 28px; }
+      .login-box { padding: 40px; }
+    }
+    .login-box p {
+      color: var(--muted);
+      margin: 0 0 var(--spacing-lg);
+      font-size: 14px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--text);
+      font-size: 16px; /* 16px évite le zoom sur iOS */
+      margin-bottom: var(--spacing-md);
+      transition: var(--transition);
+    }
+    @media (min-width: 768px) {
+      .login-box input { padding: 14px 16px; }
+    }
+    .login-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(109, 158, 255, 0.1);
+    }
+    .login-box .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 48px; /* Taille minimum pour tactile */
+    }
+    @media (hover: hover) {
+      .login-box .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    }
+    .login-box .btn:active { transform: translateY(0); opacity: 0.9; }
+    .error-msg {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: var(--danger);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      font-size: 14px;
+      display: none;
+    }
+    .error-msg.show { display: block; animation: shake 0.3s; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+    /* ===== Admin Interface ===== */
+    #adminInterface { display: none; min-height: 100vh; }
+    #adminInterface.active { display: block; }
+
+    /* Header - Mobile First */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(18, 19, 26, 0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+    @media (min-width: 768px) {
+      .header-inner {
+        padding: var(--spacing-md) var(--spacing-xl);
+        gap: var(--spacing-md);
+      }
+    }
+    .logo-img{width:40px;height:40px;border-radius:12px;overflow:hidden;display:block;box-shadow:0 4px 14px rgba(0,0,0,.45);background:var(--accent-grad);border:1px solid var(--border);}
+    .logo-img img{width:100%;height:100%;object-fit:cover;display:block;}
+    .logo-text{font-size:18px;font-weight:800;letter-spacing:.5px;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    @media(min-width:768px){.logo-text{font-size:20px;}}
+    .spacer { flex: 1; min-width: var(--spacing-sm); }
+
+    /* Main - Mobile First */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-md);
+      display: grid;
+      gap: var(--spacing-md);
+      min-height: calc(100vh - 60px);
+    }
+    @media (min-width: 768px) {
+      main {
+        padding: var(--spacing-xl);
+        gap: var(--spacing-xl);
+      }
+    }
+
+    /* Cards - Mobile First */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    @media (min-width: 768px) {
+      .card { padding: var(--spacing-xl); }
+    }
+    .card h2 {
+      margin: 0 0 var(--spacing-md);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    @media (min-width: 768px) {
+      .card h2 { font-size: 20px; margin-bottom: var(--spacing-lg); }
+    }
+
+    /* Buttons - Mobile First */
+    .btn {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      min-height: 44px; /* Taille minimum tactile */
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .btn {
+        padding: 10px 16px;
+        min-height: auto;
+      }
+    }
+    @media (hover: hover) {
+      .btn:hover { background: var(--surface-hover); transform: translateY(-1px); }
+    }
+    .btn:active { opacity: 0.8; transform: scale(0.98); }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    @media (hover: hover) {
+      .btn.primary:hover { background: var(--accent-hover); }
+    }
+    .btn.success { background: var(--success); color: white; border-color: var(--success); }
+    .btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
+    .btn.small {
+      padding: 8px 12px;
+      font-size: 13px;
+      min-height: 36px;
+    }
+    @media (min-width: 768px) {
+      .btn.small {
+        padding: 6px 12px;
+        min-height: auto;
+      }
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    /* Toolbar - Mobile First */
+    .toolbar {
+      display: flex;
+      gap: var(--spacing-xs);
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: var(--spacing-md);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+    @media (min-width: 768px) {
+      .toolbar {
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        overflow-x: visible;
+      }
+    }
+    .toolbar .btn {
+      flex-shrink: 0;
+    }
+
+    /* Forms - Mobile First */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+    }
+    @media (min-width: 640px) {
+      .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--spacing-lg);
+      }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    @media (min-width: 768px) {
+      label { font-size: 14px; }
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--text);
+      font-size: 16px; /* 16px évite le zoom sur iOS */
+      transition: var(--transition);
+      min-height: 44px; /* Taille minimum tactile */
+    }
+    @media (min-width: 768px) {
+      input[type="text"],
+      input[type="number"],
+      input[type="password"],
+      textarea,
+      select {
+        font-size: 14px;
+        min-height: auto;
+      }
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(109, 158, 255, 0.1);
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+    input[type="file"] {
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    /* Table - Mobile First */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: calc(var(--spacing-sm) * -1);
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+    }
+    @media (min-width: 768px) {
+      .table-wrapper {
+        margin: -8px;
+        padding: 8px;
+      }
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 800px; /* Force scroll horizontal sur mobile */
+    }
+    @media (min-width: 1024px) {
+      table { min-width: 100%; }
+    }
+    th {
+      background: var(--card);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    @media (min-width: 768px) {
+      th {
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      font-size: 13px;
+    }
+    @media (min-width: 768px) {
+      td {
+        padding: 14px 16px;
+        font-size: 14px;
+      }
+    }
+    @media (hover: hover) {
+      tr:hover td { background: var(--card); }
+    }
+
+    /* Table action buttons spacing */
+    td .btn + .btn {
+      margin-left: 4px;
+    }
+    @media (min-width: 768px) {
+      td .btn + .btn {
+        margin-left: 8px;
+      }
+    }
+
+    /* Pills & Tags - Mobile First */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    @media (min-width: 768px) {
+      .pill {
+        gap: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+    .pill.success { background: rgba(74, 222, 128, 0.1); border-color: var(--success); color: var(--success); }
+    .pill.warning { background: rgba(251, 191, 36, 0.1); border-color: var(--warning); color: var(--warning); }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    @media (min-width: 768px) {
+      .tag {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+    }
+
+    /* Media Preview - Mobile First */
+    .media-preview {
+      display: flex;
+      gap: var(--spacing-xs);
+      flex-wrap: wrap;
+      margin-top: var(--spacing-sm);
+    }
+    @media (min-width: 768px) {
+      .media-preview { gap: var(--spacing-sm); margin-top: var(--spacing-md); }
+    }
+    .media-item {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    @media (min-width: 768px) {
+      .media-item {
+        width: 120px;
+        height: 120px;
+      }
+    }
+    .media-item img,
+    .media-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .media-item .remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(248, 113, 113, 0.95);
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1; /* Toujours visible sur mobile */
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    @media (hover: hover) {
+      .media-item .remove { opacity: 0; }
+      .media-item:hover .remove { opacity: 1; }
+    }
+    .media-item .remove:active { transform: scale(0.9); }
+
+    /* Status - Mobile First */
+    .status {
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-word;
+    }
+    @media (min-width: 768px) {
+      .status {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+    }
+
+    /* Modal - Mobile First */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+    @media (min-width: 640px) {
+      .modal {
+        align-items: center;
+        padding: var(--spacing-md);
+      }
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: var(--spacing-lg);
+      max-width: 100%;
+      width: 100%;
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @media (min-width: 640px) {
+      .modal-content {
+        border-radius: var(--radius);
+        padding: var(--spacing-xl);
+        max-width: 600px;
+        animation: fadeIn 0.3s ease;
+      }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+      gap: var(--spacing-md);
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      flex: 1;
+    }
+    @media (min-width: 768px) {
+      .modal-header h3 { font-size: 22px; }
+    }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    @media (hover: hover) {
+      .modal-close:hover { background: var(--surface-hover); }
+    }
+    .modal-close:active { transform: scale(0.9); }
+
+    /* Stats - Mobile First */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-xs);
+    }
+    @media (min-width: 640px) {
+      .stats {
+        gap: var(--spacing-sm);
+      }
+    }
+    @media (min-width: 768px) {
+      .stats { gap: var(--spacing-md); }
+    }
+    .stat-card {
+      padding: var(--spacing-sm);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--card) 0%, var(--surface) 100%);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    @media (min-width: 480px) {
+      .stat-card { padding: var(--spacing-md); }
+    }
+    @media (min-width: 768px) {
+      .stat-card { padding: var(--spacing-lg); }
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 4px 0;
+    }
+    @media (min-width: 480px) {
+      .stat-value {
+        font-size: 28px;
+      }
+    }
+    @media (min-width: 768px) {
+      .stat-value {
+        font-size: 32px;
+        margin: 8px 0;
+      }
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    @media (min-width: 480px) {
+      .stat-label {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+      }
+    }
+    @media (min-width: 768px) {
+      .stat-label { font-size: 13px; }
+    }
+
+    /* Utilities - Mobile First */
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    @media (min-width: 768px) {
+      .small { font-size: 13px; }
+    }
+    .text-center { text-align: center; }
+    code {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--card);
+      color: var(--accent);
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      word-break: break-all;
+    }
+    @media (min-width: 768px) {
+      code { font-size: 13px; }
+    }
+
+    /* Amélioration scroll */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--card);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* Safe area pour iOS */
+    @supports (padding: max(0px)) {
+      body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+      }
+      .modal-content {
+        padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
+      }
+    }
+
+    /* Mode paysage mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .login-box {
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-content {
+        max-height: 95vh;
+      }
+    }
+
+    /* Details/Summary styling */
+    details summary {
+      list-style: none;
+      user-select: none;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    details summary::before {
+      content: '▶';
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform 0.2s;
+      color: var(--accent);
+    }
+    details[open] summary::before {
+      transform: rotate(90deg);
+    }
+    details summary:hover {
+      color: var(--accent);
+    }
+
+    /* Hide/Show elements on small screens */
+    .show-mobile { display: none !important; }
+    @media (max-width: 480px) {
+      .hide-mobile { display: none !important; }
+      .show-mobile { display: inline !important; }
+    }
+
+    /* ===== Cards View ===== */
+    .cards-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+    @media (max-width: 400px) {
+      .cards-list { grid-template-columns: repeat(2, 1fr); }
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--spacing-md);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    .product-card .actions{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-sm);
+      margin-top: auto;
+    }
+    @media (max-width: 400px){
+      .product-card .actions{ grid-template-columns: 1fr; }
+    }
+    .product-card .actions .btn{
+      min-width: 0;
+      white-space: normal; /* autorise le retour à la ligne */
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.2;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      padding: 12px; /* plus grand pour le touch */
+    }
+    /* Ne pas cacher les labels en petit écran, garder lisible */
+    @media (max-width: 400px){
+      .product-card .actions{ grid-template-columns: 1fr; }
+      .cards-list{ grid-template-columns: 1fr 1fr; }
+    }
+    /* Agrandir légèrement la largeur minimale des cartes pour éviter la casse */
+    .cards-list { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+    /* Rendre les petits boutons plus lisibles globalement */
+    .btn.small { font-size: 14px; min-height: 40px; padding: 10px 12px; }
+
+    /* Ajustements responsive ciblés 375×675 */
+    @media (max-width: 480px) {
+      /* Stats en 2 colonnes */
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      /* Grille de cartes plus compacte */
+      .cards-list { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-sm); }
+      /* Actions en 1 colonne pour éviter le débordement */
+      .product-card .actions { grid-template-columns: 1fr; }
+      .product-card .actions .btn { font-size: 14px; padding: 10px; }
+      /* Titres cartes un peu plus compacts */
+      .product-card h3 { font-size: 15px; }
+    }
+
+    /* Réduire légèrement la largeur minimale des cartes */
+    .cards-list { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    /* Petits boutons globalement compacts (annule l’augmentation précédente) */
+    .btn.small { font-size: 13px; min-height: 36px; padding: 8px 10px; }
+
+    /* Ne pas afficher d’image produit en desktop (sécurité, même si cartes masquées) */
+    @media (min-width: 768px) {
+      #productCards img { display: none; }
+    }
+
+    /* Anti-overflow sur textes longs dans les cartes */
+    .product-card h3 { word-break: break-word; }
+    .product-card .tag { max-width: 100%; white-space: normal; word-break: break-word; }
+
+    /* Compacter légèrement en très petit écran */
+    @media (max-width: 400px) {
+      .card { padding: var(--spacing-sm); }
+      .product-card { padding: var(--spacing-sm); }
+      .toolbar { gap: 6px; }
+    }
+
+    /* Override final: cartes plus étroites pour 375px */
+    .cards-list { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+    /* ===== FIX MOBILE FINAL 375×675 - OVERRIDE TOUT ===== */
+    @media (max-width: 767px) {
+      .cards-list {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin-top: 12px !important;
+      }
+
+      .product-card {
+        padding: 10px !important;
+        gap: 8px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+      }
+
+      .product-card h3 {
+        font-size: 14px !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+        margin: 0 !important;
+      }
+
+      .product-card .tag {
+        font-size: 11px !important;
+        padding: 3px 6px !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        line-height: 1.2 !important;
+      }
+
+      .product-card .price {
+        font-size: 13px !important;
+        margin: 4px 0 !important;
+      }
+
+      .product-card img {
+        max-height: 80px !important;
+        width: 100% !important;
+        object-fit: cover !important;
+      }
+
+      .product-card .actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        margin-top: auto !important;
+      }
+
+      .product-card .actions .btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: 13px !important;
+        padding: 9px 6px !important;
+        min-height: 36px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        border: none !important;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+      }
+
+      .card { padding: 12px !important; }
+      .toolbar { gap: 6px !important; }
+      main { padding: 12px !important; }
+      .header-inner { padding: 10px 12px !important; }
+
+      .table-wrapper { display: none !important; }
+      #productCards { display: grid !important; }
+    }
+
+    @media (max-width: 360px) {
+      .cards-list { gap: 8px !important; }
+      .product-card { padding: 8px !important; }
+      .product-card h3 { font-size: 13px !important; }
+      .product-card img { max-height: 70px !important; }
+    }
+
+    @media (min-width: 768px) {
+      #productCards { display: none !important; }
+      .table-wrapper { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <h1>🔐 Admin</h1>
+      <p>Entrez le code d'accès pour gérer le catalogue</p>
+      <div class="error-msg" id="loginError">Code incorrect. Réessayez.</div>
+      <form id="loginForm">
+        <input
+          type="password"
+          id="accessCode"
+          placeholder="Code d'accès"
+          required
+          autocomplete="off"
+        />
+        <button type="submit" class="btn">Se connecter</button>
+      </form>
+      <p class="small muted text-center" style="margin-top: 24px;">
+        Code par défaut : <code>admin2024</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Interface -->
+  <div id="adminInterface">
+    <header>
+      <div class="header-inner">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="logo-img"><img src="logo%20bara.jpg" alt="Logo" /></span>
+          <span class="logo-text">LE BARA 2025</span>
+        </div>
+        <span class="muted small hide-mobile">Admin</span>
+        <span class="spacer"></span>
+        <a href="/" class="btn small">👁️ <span class="hide-mobile">Voir la boutique</span></a>
+        <button id="btnLogout" class="btn small danger">🚪 <span class="hide-mobile">Déconnexion</span></button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Produits</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Disponibles</div>
+          <div class="stat-value" id="statAvailable" style="color: var(--success)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Masqués</div>
+          <div class="stat-value" id="statHidden" style="color: var(--warning)">0</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <section class="card">
+        <div class="toolbar">
+          <button id="btnLoad" class="btn">📂 <span class="hide-mobile">Charger</span></button>
+          <button id="btnImport" class="btn">📥 <span class="hide-mobile">Importer</span></button>
+          <input id="fileImport" type="file" accept="application/json" style="display:none" />
+          <button id="btnLink" class="btn hide-mobile">🔗 Lier fichier</button>
+          <span class="spacer"></span>
+          <button id="btnSave" class="btn success" disabled>💾 <span class="hide-mobile">Enregistrer</span></button>
+          <button id="btnCopy" class="btn hide-mobile">📋 Copier</button>
+          <button id="btnDownload" class="btn primary">⬇️ <span class="hide-mobile">Télécharger</span></button>
+        </div>
+        <div class="status" id="status">Prêt. Chargez ou importez un catalogue.</div>
+      </section>
+
+      <!-- Products Table -->
+      <section class="card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-md); gap: var(--spacing-sm); flex-wrap: wrap;">
+          <h2 style="margin: 0;">📦 Produits</h2>
+          <button id="btnAddProduct" class="btn primary"><span class="hide-mobile">+ Ajouter un produit</span><span class="show-mobile">+</span></button>
+        </div>
+
+        <div class="table-wrapper desktop-only">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Ferme</th>
+                <th>Prix</th>
+                <th>Médias</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Vue cartes (mobile) -->
+        <div id="productCards" class="cards-list mobile-only"></div>
+      </section>
+
+      <!-- JSON Viewer -->
+      <section class="card">
+        <details>
+          <summary style="cursor: pointer; font-weight: 600; font-size: 16px; padding: var(--spacing-xs) 0;">
+            📄 Vue JSON <span class="muted small">(cliquez pour voir)</span>
+          </summary>
+          <textarea id="jsonArea" readonly style="width:100%; min-height:300px; margin-top: var(--spacing-md); font-family: monospace; font-size: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--spacing-sm);"></textarea>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Add/Edit Product -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Ajouter un produit</h3>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+
+      <form id="productForm">
+        <input type="hidden" id="editProductId" />
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="productName">Nom du produit *</label>
+            <input type="text" id="productName" required placeholder="ex: Fleur OG Kush" />
+          </div>
+
+          <div class="form-group">
+            <label for="productCategory">Catégorie *</label>
+            <input type="text" id="productCategory" required placeholder="ex: Fleurs, Huiles..." />
+          </div>
+
+          <div class="form-group">
+            <label for="productPrice">Prix (€)</label>
+            <input type="number" id="productPrice" step="0.01" placeholder="19.90" />
+            <small class="muted">Laissez vide si vous utilisez des paliers</small>
+          </div>
+
+          <div class="form-group">
+            <label for="productFarm">Ferme</label>
+            <input type="text" id="productFarm" placeholder="ex: Green Valley" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label for="productDescription">Description</label>
+          <textarea id="productDescription" placeholder="Description du produit..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label>Médias (images/vidéos)</label>
+          <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <input type="file" id="mediaFiles" accept="image/*,video/*" multiple style="flex: 1;" />
+            <button type="button" class="btn" id="btnAddMediaUrl">+ URL</button>
+          </div>
+          <div id="mediaUrlInputs" style="display: none; margin-bottom: 12px;">
+            <input type="text" id="mediaUrlInput" placeholder="https://..." style="width: 100%;" />
+            <button type="button" class="btn small" id="btnConfirmUrl" style="margin-top: 8px;">Ajouter</button>
+          </div>
+          <div id="mediaPreview" class="media-preview"></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label>
+            <input type="checkbox" id="productAvailable" checked style="width: auto; margin-right: 8px;" />
+            Produit disponible
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 32px;">
+          <button type="button" class="btn" id="modalCancel">Annuler</button>
+          <button type="submit" class="btn primary" style="flex: 1;">
+            <span id="modalSubmitText">Ajouter</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Configuration =====
+    const ACCESS_CODE = 'admin2024'; // Changez ce code pour sécuriser l'accès
+
+    // ===== State Management =====
+    const state = {
+      catalog: { products: [] },
+      fileHandle: null,
+      currentMedia: [],
+      editingProductId: null
+    };
+
+    // ===== DOM Elements =====
+    const els = {
+      loginScreen: document.getElementById('loginScreen'),
+      loginForm: document.getElementById('loginForm'),
+      accessCode: document.getElementById('accessCode'),
+      loginError: document.getElementById('loginError'),
+      adminInterface: document.getElementById('adminInterface'),
+      btnLogout: document.getElementById('btnLogout'),
+      status: document.getElementById('status'),
+      statTotal: document.getElementById('statTotal'),
+      statAvailable: document.getElementById('statAvailable'),
+      statHidden: document.getElementById('statHidden'),
+      tbody: document.getElementById('tbody'),
+      jsonArea: document.getElementById('jsonArea'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnImport: document.getElementById('btnImport'),
+      fileImport: document.getElementById('fileImport'),
+      btnLink: document.getElementById('btnLink'),
+      btnSave: document.getElementById('btnSave'),
+      btnCopy: document.getElementById('btnCopy'),
+      btnDownload: document.getElementById('btnDownload'),
+      btnAddProduct: document.getElementById('btnAddProduct'),
+      productModal: document.getElementById('productModal'),
+      modalClose: document.getElementById('modalClose'),
+      modalCancel: document.getElementById('modalCancel'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalSubmitText: document.getElementById('modalSubmitText'),
+      productForm: document.getElementById('productForm'),
+      editProductId: document.getElementById('editProductId'),
+      productName: document.getElementById('productName'),
+      productCategory: document.getElementById('productCategory'),
+      productPrice: document.getElementById('productPrice'),
+      productFarm: document.getElementById('productFarm'),
+      productDescription: document.getElementById('productDescription'),
+      productAvailable: document.getElementById('productAvailable'),
+      mediaFiles: document.getElementById('mediaFiles'),
+      mediaPreview: document.getElementById('mediaPreview'),
+      btnAddMediaUrl: document.getElementById('btnAddMediaUrl'),
+      mediaUrlInputs: document.getElementById('mediaUrlInputs'),
+      mediaUrlInput: document.getElementById('mediaUrlInput'),
+      btnConfirmUrl: document.getElementById('btnConfirmUrl'),
+      productCards: document.getElementById('productCards')
+    };
+
+    // ===== Authentication =====
+    els.loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = els.accessCode.value;
+      if (code === ACCESS_CODE) {
+        els.loginScreen.style.display = 'none';
+        els.adminInterface.classList.add('active');
+        sessionStorage.setItem('admin_authenticated', 'true');
+        loadCatalog();
+      } else {
+        els.loginError.classList.add('show');
+        els.accessCode.value = '';
+        setTimeout(() => els.loginError.classList.remove('show'), 3000);
+      }
+    });
+
+    els.btnLogout.addEventListener('click', () => {
+      sessionStorage.removeItem('admin_authenticated');
+      location.reload();
+    });
+
+    // Check if already authenticated
+    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+      els.loginScreen.style.display = 'none';
+      els.adminInterface.classList.add('active');
+      loadCatalog();
+    }
+
+    // ===== Utility Functions =====
+    function setStatus(msg) {
+      els.status.textContent = msg;
+    }
+
+    function slugify(s) {
+      return (s || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    function escapeHtml(s) {
+      return (s || '').replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[c]));
+    }
+
+    function normalizeProducts() {
+      state.catalog.products = (state.catalog.products || []).map(p => {
+        if (typeof p.available === 'undefined') p.available = true;
+        return p;
+      });
+    }
+
+    function updateStats() {
+      const products = state.catalog.products;
+      const available = products.filter(p => p.available !== false).length;
+      const hidden = products.length - available;
+
+      els.statTotal.textContent = products.length;
+      els.statAvailable.textContent = available;
+      els.statHidden.textContent = hidden;
+    }
+
+    // ===== Catalog Management =====
+    async function loadCatalog() {
+      setStatus('⏳ Chargement du catalog.json...');
+      try {
+        const res = await fetch('catalog.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json || !Array.isArray(json.products)) throw new Error('Format invalide');
+        state.catalog = json;
+        normalizeProducts();
+        render();
+        setStatus('✅ Catalogue chargé avec succès');
+      } catch (err) {
+        console.warn('Erreur chargement serveur:', err);
+
+        // Vérifier si un backup local existe
+        const backup = localStorage.getItem('catalog_backup');
+        const backupDate = localStorage.getItem('catalog_backup_date');
+
+        if (backup) {
+          try {
+            const json = JSON.parse(backup);
+            if (json && Array.isArray(json.products)) {
+              const date = backupDate ? new Date(backupDate).toLocaleString('fr-FR') : 'inconnue';
+              const useBackup = confirm(
+                `Le serveur est inaccessible.\n\n` +
+                `Un backup local existe (date: ${date}).\n` +
+                `${json.products.length} produits trouvés.\n\n` +
+                `Voulez-vous charger ce backup ?`
+              );
+
+              if (useBackup) {
+                state.catalog = json;
+                normalizeProducts();
+                render();
+                setStatus(`📦 Backup local chargé (${date})`);
+                return;
+              }
+            }
+          } catch (e) {
+            console.error('Erreur backup local:', e);
+          }
+        }
+
+        setStatus('⚠️ Serveur inaccessible et aucun backup. Importez un JSON ou relancez le serveur.');
+      }
+    }
+
+    async function saveCatalog() {
+      setStatus('💾 Sauvegarde en cours...');
+
+      // Toujours sauvegarder en localStorage comme backup
+      try {
+        localStorage.setItem('catalog_backup', JSON.stringify(state.catalog));
+        localStorage.setItem('catalog_backup_date', new Date().toISOString());
+        console.log('✅ Backup local sauvegardé');
+      } catch (e) {
+        console.warn('⚠️ Impossible de sauvegarder le backup local:', e);
+      }
+
+      // Tenter la sauvegarde sur le serveur
+      try {
+        const response = await fetch('/api/catalog', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(state.catalog)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        setStatus('✅ Catalogue sauvegardé avec succès (serveur + backup local) !');
+        console.log('✅ Sauvegarde serveur OK');
+        return true;
+      } catch (err) {
+        // Si le serveur échoue, on a au moins le backup local
+        setStatus(`⚠️ Serveur inaccessible, mais sauvegarde locale OK. Relancez le serveur.`);
+        console.error('❌ Erreur sauvegarde serveur:', err);
+        console.info('💡 Backup local disponible dans localStorage');
+
+        // Proposer de télécharger le fichier
+        if (confirm('Le serveur est inaccessible. Voulez-vous télécharger le catalogue maintenant ?')) {
+          downloadCatalog();
+        }
+        return false;
+      }
+    }
+
+    function downloadCatalog() {
+      const blob = new Blob([JSON.stringify(state.catalog, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `catalog_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('⬇️ Catalogue téléchargé');
+    }
+
+    function render() {
+      const list = state.catalog.products;
+      updateStats();
+
+      els.tbody.innerHTML = list.map(p => {
+        const mediaCount = Array.isArray(p.media) ? p.media.length : 0;
+        const price = (p.price != null)
+          ? '€' + Number(p.price).toFixed(2)
+          : (Array.isArray(p.tiers) && p.tiers.length ? 'Paliers' : '—');
+        const statusClass = p.available !== false ? 'success' : 'warning';
+        const statusText = p.available !== false ? 'Disponible' : 'Masqué';
+
+        return `<tr data-id="${encodeURIComponent(p.id)}">
+          <td><code>${escapeHtml(p.id)}</code></td>
+          <td><strong>${escapeHtml(p.name || '')}</strong></td>
+          <td><span class="tag">${escapeHtml(p.category || '')}</span></td>
+          <td>${escapeHtml(p.farm || '—')}</td>
+          <td>${escapeHtml(price)}</td>
+          <td>${mediaCount} 📸</td>
+          <td><span class="pill ${statusClass}">${statusText}</span></td>
+          <td style="white-space: nowrap;">
+            <button class="btn small" data-action="edit" title="Modifier">✏️<span class="hide-mobile"> Modifier</span></button>
+            <button class="btn small danger" data-action="delete" title="Supprimer">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      // Render cards view
+      const cardsContainer = document.getElementById('productCards');
+      cardsContainer.innerHTML = list.map(p => {
+        const media = Array.isArray(p.media) && p.media.length > 0 ? p.media[0] : null;
+        const mediaUrl = media ? (media.thumb || media.src) : '';
+        const price = (p.price != null)
+          ? '€' + Number(p.price).toFixed(2)
+          : (Array.isArray(p.tiers) && p.tiers.length ? 'Paliers' : '—');
+
+        return `<div class="product-card" data-id="${encodeURIComponent(p.id)}">
+          ${mediaUrl ? `<img src="${escapeHtml(mediaUrl)}" alt="" style="width:100%; border-radius:var(--radius); margin-bottom: var(--spacing-sm);" />` : ''}
+          <h3>${escapeHtml(p.name || '')}</h3>
+          <span class="tag">${escapeHtml(p.category || '')}</span>
+          <div class="price">${escapeHtml(price)}</div>
+          <div class="actions">
+            <button class="btn small" data-action="edit" title="Modifier">
+              <span class="label">✏️ Modifier</span>
+            </button>
+            <button class="btn small danger" data-action="delete" title="Supprimer">
+              <span class="label">🗑️ Supprimer</span>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+
+      els.jsonArea.value = JSON.stringify(state.catalog, null, 2);
+    }
+
+    // ===== Table Actions =====
+    els.tbody.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr');
+      if (!tr) return;
+
+      const id = decodeURIComponent(tr.getAttribute('data-id'));
+      const product = state.catalog.products.find(x => String(x.id) === String(id));
+      if (!product) return;
+
+      if (e.target.matches('button[data-action="edit"]') || e.target.closest('button[data-action="edit"]')) {
+        openEditModal(product);
+      } else if (e.target.matches('button[data-action="delete"]') || e.target.closest('button[data-action="delete"]')) {
+        if (confirm(`❌ Supprimer définitivement "${product.name}" ?\n\nCette action est irréversible.`)) {
+          state.catalog.products = state.catalog.products.filter(x => String(x.id) !== String(id));
+          render();
+          setStatus(`🗑️ Produit "${product.name}" supprimé`);
+          saveCatalog();
+        }
+      }
+    });
+
+    // ===== Cards Actions =====
+    els.productCards.addEventListener('click', (e) => {
+      const card = e.target.closest('.product-card');
+      if (!card) return;
+
+      const id = decodeURIComponent(card.getAttribute('data-id'));
+      const product = state.catalog.products.find(x => String(x.id) === String(id));
+      if (!product) return;
+
+      if (e.target.matches('button[data-action="edit"]') || e.target.closest('button[data-action="edit"]')) {
+        openEditModal(product);
+      } else if (e.target.matches('button[data-action="delete"]') || e.target.closest('button[data-action="delete"]')) {
+        if (confirm(`❌ Supprimer définitivement "${product.name}" ?\n\nCette action est irréversible.`)) {
+          state.catalog.products = state.catalog.products.filter(x => String(x.id) !== String(id));
+          render();
+          setStatus(`🗑️ Produit "${product.name}" supprimé`);
+          saveCatalog();
+        }
+      }
+    });
+
+    // ===== Modal Management =====
+    function openAddModal() {
+      state.editingProductId = null;
+      state.currentMedia = [];
+      els.modalTitle.textContent = '➕ Ajouter un produit';
+      els.modalSubmitText.textContent = 'Ajouter';
+      els.editProductId.value = '';
+      els.productForm.reset();
+      els.mediaPreview.innerHTML = '';
+      els.productAvailable.checked = true;
+      els.productModal.classList.add('active');
+    }
+
+    function openEditModal(product) {
+      state.editingProductId = product.id;
+      state.currentMedia = Array.isArray(product.media) ? [...product.media] : [];
+
+      els.modalTitle.textContent = '✏️ Modifier le produit';
+      els.modalSubmitText.textContent = 'Enregistrer';
+      els.editProductId.value = product.id;
+      els.productName.value = product.name || '';
+      els.productCategory.value = product.category || '';
+      els.productPrice.value = product.price != null ? product.price : '';
+      els.productFarm.value = product.farm || '';
+      els.productDescription.value = product.description || '';
+      els.productAvailable.checked = product.available !== false;
+
+      renderMediaPreview();
+      els.productModal.classList.add('active');
+    }
+
+    function closeModal() {
+      els.productModal.classList.remove('active');
+      state.currentMedia = [];
+      state.editingProductId = null;
+    }
+
+    els.btnAddProduct.addEventListener('click', openAddModal);
+    els.modalClose.addEventListener('click', closeModal);
+    els.modalCancel.addEventListener('click', closeModal);
+
+    // Close modal on background click
+    els.productModal.addEventListener('click', (e) => {
+      if (e.target === els.productModal) closeModal();
+    });
+
+    // ===== Media Management =====
+    function renderMediaPreview() {
+      els.mediaPreview.innerHTML = state.currentMedia.map((media, index) => {
+        const isVideo = media.type === 'video';
+        const src = media.src || media.thumb || '';
+
+        return `<div class="media-item" data-index="${index}">
+          ${isVideo
+            ? `<video src="${escapeHtml(src)}" controls></video>`
+            : `<img src="${escapeHtml(src)}" alt="" />`
+          }
+          <button class="remove" data-remove="${index}">×</button>
+        </div>`;
+      }).join('');
+    }
+
+    els.mediaPreview.addEventListener('click', (e) => {
+      if (e.target.matches('[data-remove]')) {
+        const index = parseInt(e.target.getAttribute('data-remove'));
+        state.currentMedia.splice(index, 1);
+        renderMediaPreview();
+      }
+    });
+
+    els.mediaFiles.addEventListener('change', async () => {
+      const files = Array.from(els.mediaFiles.files || []);
+      for (const file of files) {
+        const dataUrl = await fileToDataURL(file);
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+        state.currentMedia.push({
+          type,
+          src: dataUrl,
+          thumb: type === 'image' ? dataUrl : undefined
+        });
+      }
+      renderMediaPreview();
+      els.mediaFiles.value = '';
+    });
+
+    els.btnAddMediaUrl.addEventListener('click', () => {
+      els.mediaUrlInputs.style.display = els.mediaUrlInputs.style.display === 'none' ? 'block' : 'none';
+    });
+
+    els.btnConfirmUrl.addEventListener('click', () => {
+      const url = els.mediaUrlInput.value.trim();
+      if (url) {
+        state.currentMedia.push(guessMediaFromUrl(url));
+        renderMediaPreview();
+        els.mediaUrlInput.value = '';
+        els.mediaUrlInputs.style.display = 'none';
+      }
+    });
+
+    function guessMediaFromUrl(url) {
+      const lower = url.toLowerCase();
+      const isVideo = /\.(mp4|webm|mov|m4v)(\?|#|$)/.test(lower);
+      const isImage = /\.(png|jpe?g|gif|webp|svg)(\?|#|$)/.test(lower);
+      return {
+        type: isVideo ? 'video' : 'image',
+        src: url,
+        thumb: isImage ? url : undefined
+      };
+    }
+
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ===== Product Form Submit =====
+    els.productForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = els.productName.value.trim();
+      const category = els.productCategory.value.trim();
+      const priceStr = els.productPrice.value.trim();
+      const farm = els.productFarm.value.trim();
+      const description = els.productDescription.value.trim();
+      const available = els.productAvailable.checked;
+
+      if (!name || !category) {
+        alert('⚠️ Le nom et la catégorie sont obligatoires');
+        return;
+      }
+
+      const isEditing = !!state.editingProductId;
+
+      if (isEditing) {
+        // Update existing product
+        const product = state.catalog.products.find(p => String(p.id) === String(state.editingProductId));
+        if (product) {
+          product.name = name;
+          product.category = category;
+          product.description = description;
+          product.farm = farm || undefined;
+          product.available = available;
+
+          if (priceStr) {
+            const price = Number(priceStr);
+            if (Number.isFinite(price)) product.price = price;
+          } else {
+            delete product.price;
+          }
+
+          if (state.currentMedia.length > 0) {
+            product.media = state.currentMedia;
+          } else {
+            delete product.media;
+          }
+
+          setStatus(`✅ Produit "${name}" modifié`);
+        }
+      } else {
+        // Add new product
+        let id = slugify(name);
+        const existingIds = new Set(state.catalog.products.map(p => String(p.id)));
+        let base = id, i = 2;
+        while (existingIds.has(id)) {
+          id = `${base}-${i++}`;
+        }
+
+        const product = {
+          id,
+          name,
+          category,
+          description,
+          farm: farm || undefined,
+          available
+        };
+
+        if (priceStr) {
+          const price = Number(priceStr);
+          if (Number.isFinite(price)) product.price = price;
+        }
+
+        if (state.currentMedia.length > 0) {
+          product.media = state.currentMedia;
+        }
+
+        state.catalog.products.push(product);
+        setStatus(`✅ Produit "${name}" ajouté`);
+      }
+
+      render();
+      closeModal();
+      saveCatalog();
+    });
+
+    // ===== File Operations =====
+    els.btnLoad.addEventListener('click', loadCatalog);
+
+    els.btnImport.addEventListener('click', () => els.fileImport.click());
+    els.fileImport.addEventListener('change', async () => {
+      const file = els.fileImport.files && els.fileImport.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if (!json || !Array.isArray(json.products)) {
+          throw new Error('Format invalide: { products: [] } attendu');
+        }
+        state.catalog = json;
+        normalizeProducts();
+        render();
+        setStatus(`✅ Importé: ${file.name}`);
+      } catch (err) {
+        alert('⚠️ Import invalide: ' + err.message);
+      } finally {
+        els.fileImport.value = '';
+      }
+    });
+
+    // File System Access API
+    const fsSupported = 'showOpenFilePicker' in window;
+    if (!fsSupported) {
+      els.btnLink.style.display = 'none';
+      els.btnSave.style.display = 'none';
+    }
+
+    els.btnLink.addEventListener('click', async () => {
+      if (!fsSupported) {
+        alert('⚠️ Fonction non supportée par votre navigateur');
+        return;
+      }
+
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          multiple: false,
+          types: [{
+            description: 'JSON',
+            accept: { 'application/json': ['.json'] }
+          }]
+        });
+
+        if (!handle) return;
+
+        state.fileHandle = handle;
+        const text = await (await handle.getFile()).text();
+        const json = JSON.parse(text);
+
+        if (!json || !Array.isArray(json.products)) {
+          throw new Error('Format invalide: { products: [] } attendu');
+        }
+
+        state.catalog = json;
+        normalizeProducts();
+        render();
+        els.btnSave.disabled = false;
+        setStatus('🔗 Fichier lié: prêt à enregistrer');
+      } catch (err) {
+        setStatus('⚠️ Lien de fichier annulé ou invalide');
+        console.warn(err);
+      }
+    });
+
+    els.btnSave.addEventListener('click', async () => {
+      if (!state.fileHandle) {
+        alert('⚠️ Aucun fichier lié. Utilisez "Lier fichier" d\'abord.');
+        return;
+      }
+
+      try {
+        const perm = await verifyPermission(state.fileHandle, true);
+        if (!perm) {
+          alert("⚠️ Permission d'écriture refusée");
+          return;
+        }
+
+        const writable = await state.fileHandle.createWritable();
+        await writable.write(new Blob([els.jsonArea.value], { type: 'application/json' }));
+        await writable.close();
+        setStatus('💾 catalog.json enregistré avec succès');
+      } catch (err) {
+        setStatus("⚠️ Échec de l'enregistrement");
+        console.error(err);
+      }
+    });
+
+    async function verifyPermission(fileHandle, write = false) {
+      const opts = write ? { mode: 'readwrite' } : {};
+      if ((await fileHandle.queryPermission(opts)) === 'granted') return true;
+      if ((await fileHandle.requestPermission(opts)) === 'granted') return true;
+      return false;
+    }
+
+    els.btnCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(els.jsonArea.value);
+        setStatus('📋 JSON copié dans le presse-papiers');
+      } catch {
+        setStatus('⚠️ Copie impossible');
+      }
+    });
+
+    els.btnDownload.addEventListener('click', () => {
+      const blob = new Blob([els.jsonArea.value], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'catalog.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('⬇️ Téléchargement démarré');
+    });
+  </script>
+</body>
+</html>

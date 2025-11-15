@@ -1,0 +1,106 @@
+/* FIX MOBILE 375×675 - À injecter en dernier dans admin.html */
+
+/* RESET complet des cartes pour mobile */
+@media (max-width: 767px) {
+  /* Forcer 2 colonnes fixes */
+  .cards-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  /* Carte ultra-compacte */
+  .product-card {
+    padding: 10px !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Titres petits et wrappés */
+  .product-card h3 {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+    word-break: break-word !important;
+    margin: 0 !important;
+  }
+
+  /* Tags compacts */
+  .product-card .tag {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Prix compact */
+  .product-card .price {
+    font-size: 13px !important;
+    margin: 4px 0 !important;
+  }
+
+  /* Images réduites */
+  .product-card img {
+    max-height: 80px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* Actions: 1 colonne verticale OBLIGATOIRE */
+  .product-card .actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-top: auto !important;
+  }
+
+  /* Boutons compacts */
+  .product-card .actions .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 13px !important;
+    padding: 9px 6px !important;
+    min-height: 36px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    border: none !important;
+  }
+
+  /* Stats 2 colonnes */
+  .stats {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Padding réduit partout */
+  .card { padding: 12px !important; }
+  .toolbar { gap: 6px !important; }
+  main { padding: 12px !important; }
+
+  /* Header compact */
+  .header-inner { padding: 10px 12px !important; }
+}
+
+/* Très petit (< 360px) */
+@media (max-width: 360px) {
+  .cards-list { gap: 8px !important; }
+  .product-card { padding: 8px !important; }
+  .product-card h3 { font-size: 13px !important; }
+  .product-card img { max-height: 70px !important; }
+}
+
+/* Desktop: masquer cartes */
+@media (min-width: 768px) {
+  #productCards { display: none !important; }
+  .table-wrapper { display: block !important; }
+}
+
+/* Mobile: masquer tableau */
+@media (max-width: 767px) {
+  .table-wrapper { display: none !important; }
+  #productCards { display: grid !important; }
+}
+

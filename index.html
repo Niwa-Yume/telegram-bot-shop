@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Le Bara 2025 · Mini‑app</title>
+    <!-- Précharge logo (espace encodé) -->
+    <link rel="preload" as="image" href="logo%20bara.jpg" />
+    <meta name="description" content="Boutique CBD démo pour Telegram WebApp — mobile‑first, rapide et accessible." />
+    <meta name="theme-color" content="#0b0b0b" />
+    <!-- CSP de base (styles inline autorisés pour conserver la <style> existante). Ajuster au besoin -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://telegram.org; script-src 'self' https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; connect-src 'self';" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      /* ==========================
+         Design modernisé — tokens
+         ========================== */
+      :root{
+        /* Nouvelle palette inspirée du visuel (cyan->bleu->violet->rose) */
+        --accent: #24cfff;
+        --accent2: #0079ff;
+        --accent3: #8c34ff;
+        --accent4: #ff4fa3;
+        --accent-grad: linear-gradient(135deg,var(--accent) 0%,var(--accent2) 30%,var(--accent3) 65%,var(--accent4) 100%);
+        --accent-contrast:#ffffff;
+        --bg:#05060a;
+        --surface:#0c0d12;
+        --card:#12141d;
+        --border: rgba(255,255,255,0.07);
+        --text:#f5f8ff;
+        --muted:#a2adc4;
+        --success: #42b883;
+        --danger: #ff6b6b;
+        --radius: 14px;
+        --radius-sm: 10px;
+        --shadow: 0 12px 30px rgba(2,6,23,0.55);
+        --space-1: 6px; --space-2: 10px; --space-3: 14px; --space-4: 18px; --space-5: 24px;
+        --max-width: 1080px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      }
+      /* Slight light-mode adjustments when prefers-color-scheme: light */
+      @media (prefers-color-scheme: light){
+        :root{ --bg:#fafafa; --surface:#ffffff; --card:#ffffff; --text:#0b0b0b; --muted:rgba(11,11,11,0.6); --border: rgba(11,11,11,0.06); --glass: rgba(0,0,0,0.03); }
+      }
+
+      /* Reset & base */
+      *,*::before,*::after{ box-sizing: border-box }
+      html,body{ height:100%; }
+      body{
+        margin:0; background: linear-gradient(180deg,var(--bg), color-mix(in oklab,var(--bg) 95%, var(--surface))); color:var(--text);
+        -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1.38;
+      }
+      a{ color:var(--accent); text-decoration:none }
+      a:focus{ outline:2px solid color-mix(in oklab,var(--accent) 40%, transparent); border-radius:6px }
+
+      /* Skip link for keyboard users */
+      .skip-link{
+        position:fixed; left:12px; top:12px; z-index:999; background:var(--glass); color:var(--text); padding:8px 10px; border-radius:8px; transform:translateY(-8px); opacity:0; transition:opacity .18s, transform .18s; box-shadow: var(--shadow);
+      }
+      .skip-link:focus{ opacity:1; transform:translateY(0); }
+
+      .page{ min-height:100%; padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 16px) env(safe-area-inset-left); }
+
+      /* Header modernisé */
+      .header{ background:linear-gradient(180deg,rgba(12,13,18,.9),rgba(12,13,18,.6)); box-shadow:0 4px 14px rgba(0,0,0,.55); }
+      .header .inner{ max-width:var(--max-width); margin:0 auto; padding:12px 18px; display:flex; gap:12px; align-items:center; }
+      .brand{ display:flex; gap:12px; align-items:center; }
+      .logo-box{width:48px;height:48px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:var(--accent-grad);border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+      .logo-box img{width:100%;height:100%;object-fit:cover;display:block}
+      .title{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:.5px;margin:0;font-size:1.15rem}
+      .subtitle{color:var(--muted);margin:0;font-size:.78rem}
+
+      /* Search area */
+      .tools{ max-width:var(--max-width); margin:10px auto 0; padding: 0 18px 12px; display:grid; gap:10px }
+      .search{ display:flex; align-items:center; gap:8px; }
+      .search input{ width:100%; padding:12px 44px 12px 44px; border-radius:999px; border:1px solid var(--border); background: linear-gradient(180deg,var(--card), color-mix(in oklab,var(--card) 90%, transparent)); color:inherit; box-shadow:none; font-size:0.95rem }
+      .search .icon{ position:relative; left:36px; margin-right:auto; opacity:.78 }
+      .search .clear{ position:relative; margin-left:-40px; background:transparent; border:none; color:var(--muted); cursor:pointer }
+
+      .filters{ display:flex; gap:8px; overflow:auto; padding-bottom:2px }
+      .chip{ white-space:nowrap; padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:inherit; cursor:pointer; font-weight:600; font-size:.86rem }
+      .chip[aria-pressed="true"]{ background:var(--accent-grad);color:#fff;border-color:rgba(255,255,255,0.18);box-shadow:0 4px 18px rgba(0,0,0,.4) }
+      /* Nouveau: style du select des fermes */
+      .farm-select{ appearance:none; -webkit-appearance:none; -moz-appearance:none; padding:8px 28px 8px 12px; border-radius:999px; border:1px solid var(--border); background:var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center; color:inherit; font-weight:600; font-size:.86rem; cursor:pointer; }
+
+      /* Grid produits */
+      .wrap{ max-width:var(--max-width); margin:0 auto; padding: 14px 18px 36px }
+      .grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:14px }
+      @media(min-width:720px){ .grid{ grid-template-columns: repeat(3, 1fr) } }
+      @media(min-width:1024px){ .grid{ grid-template-columns: repeat(4, 1fr) } }
+
+      .card{ display:flex; flex-direction:column; gap:10px; background: linear-gradient(180deg,var(--card), color-mix(in oklab,var(--card) 90%, transparent)); border-radius:var(--radius); padding:12px; border:1px solid var(--border); box-shadow: var(--shadow); transition: transform .16s cubic-bezier(.2,.9,.28,1), box-shadow .16s; cursor:pointer }
+      .card:focus-visible{ outline:3px solid var(--accent2); outline-offset:2px }
+      .card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.55) }
+
+      .media{ position:relative; border-radius: var(--radius-sm); overflow:hidden; }
+      .media img{ width:100%; height:160px; object-fit:cover; display:block }
+      .price-badge{ position:absolute; left:12px; top:12px; background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.25)); color:#fff; padding:6px 10px; border-radius:999px; font-weight:700; font-size:0.92rem }
+      .name{ margin:0; font-weight:700; font-size:0.98rem }
+      .cat{ margin:2px 0 0; font-size:0.82rem; color:var(--muted) }
+      .meta-row{ display:flex; align-items:center; justify-content:space-between; gap:8px }
+
+      /* Modal amélioré */
+      .modal{ position:fixed; inset:0; display:grid; place-items:center; background: linear-gradient(180deg, rgba(2,6,23,0.6), transparent); z-index:120; padding:18px }
+      .modal[hidden]{ display:none }
+      .dialog{ width:min(980px,96vw); max-height:92vh; background:var(--surface); border-radius:16px; border:1px solid var(--border); overflow:hidden; box-shadow: 0 30px 80px rgba(2,6,23,0.7); display:grid; grid-template-rows:auto 1fr auto }
+      .dialog-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border) }
+      .dialog-title{ margin:0; font-size:1.05rem }
+      .close{ background:transparent; border:1px solid var(--border); color:var(--text); padding:8px; border-radius:10px; cursor:pointer }
+      .detail{ display:grid; grid-template-columns: 1fr; gap:12px; padding:14px }
+      @media(min-width:820px){ .detail{ grid-template-columns: 1.1fr .9fr } }
+
+      .viewer{ border-radius:12px; background:var(--card); overflow:hidden; border:1px solid var(--border) }
+      .stage{ width:100%; aspect-ratio:16/10; display:grid; place-items:center }
+      .stage img, .stage video{ width:100%; height:100%; object-fit:contain }
+      .nav{ position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; display:grid; place-items:center; border-radius:999px; background:rgba(0,0,0,0.4); color:#fff; border:1px solid var(--border); cursor:pointer }
+      .nav.prev{ left:12px } .nav.next{ right:12px }
+      .thumbs{ display:flex; gap:8px; margin-top:12px; overflow:auto }
+      .thumb{ width:72px; height:54px; border-radius:10px; background-size:cover; background-position:center; border:2px solid transparent; cursor:pointer }
+      .thumb[aria-selected="true"]{ border-color:var(--accent) }
+
+      .actions{ position:sticky; bottom:0; padding:12px; border-top:1px solid var(--border); background: linear-gradient(180deg, color-mix(in oklab,var(--surface) 90%, transparent), transparent) }
+      .cta{ display:flex; gap:10px }
+      .btn{ padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer }
+      .btn.primary{background:var(--accent-grad);color:#fff;border:none}
+      .btn.primary:active{filter:brightness(.9)}
+
+      /* Toast */
+      .toast{ position:fixed; left:50%; bottom: max(16px, env(safe-area-inset-bottom)); transform:translateX(-50%); background: rgba(0,0,0,0.8); color:#fff; padding:10px 14px; border-radius:10px; z-index:220 }
+
+      /* reduced motion */
+      @media (prefers-reduced-motion: reduce){ .card, .grid, .dialog{ transition:none } }
+
+      /* small utility */
+      .muted{ color:var(--muted) }
+
+      /* Options de grammage */
+      .tiers{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px }
+      .option{ padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:inherit; cursor:pointer; font-weight:600; font-size:.86rem }
+      .option[aria-pressed="true"]{background:var(--accent-grad);color:#fff;border-color:rgba(255,255,255,0.18);box-shadow:0 4px 18px rgba(0,0,0,.4) }
+    </style>
+  </head>
+  <body>
+    <a href="#content" class="skip-link">Aller au contenu</a>
+    <noscript>Cette mini‑app nécessite JavaScript.</noscript>
+    <div class="page" id="app">
+      <header class="header" role="banner">
+        <div class="inner">
+          <div class="brand">
+            <div class="logo-box" aria-hidden="true">
+              <img src="logo%20bara.jpg" alt="Logo Le Bara 2025" />
+            </div>
+            <div>
+              <h1 class="title" id="appTitle">LE BARA 2025</h1>
+              <p class="subtitle" id="appSub">Catalogue officiel</p>
+            </div>
+          </div>
+          <!-- Placeholder for potential header actions (profil, panier, etc.) -->
+          <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+            <button aria-label="Ouvrir le menu" class="btn" style="padding:8px 10px;">☰</button>
+            <button aria-label="Ouvrir le panier" class="btn" style="padding:8px 10px;">🛒</button>
+          </div>
+        </div>
+        <div class="tools" role="search">
+          <div class="search">
+            <span class="icon" aria-hidden="true">🔎</span>
+            <input id="q" type="search" placeholder="Rechercher un produit (ex: huile, fleur, résine)…" autocomplete="off" aria-label="Rechercher des produits" />
+            <button class="clear" aria-label="Effacer la recherche" title="Effacer">✕</button>
+          </div>
+          <div class="filters" aria-label="Catégories" id="filters">
+            <!-- Boutons de catégories injectés dynamiquement -->
+          </div>
+        </div>
+      </header>
+
+      <main class="wrap" id="content" role="main">
+        <div id="grid" class="grid" aria-live="polite">
+          <!-- Exemple statique affiché lorsque JS n'a pas encore rempli la grille (utilisé comme démonstration du design) -->
+          <article class="card" tabindex="0" aria-labelledby="p1-name" role="article" data-id="oil-10">
+            <div class="media">
+              <!-- Image produit inline (placeholder SVG) -->
+              <svg role="img" aria-label="Huile CBD 10% — flacon" width="100%" height="160" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="display:block">
+                <defs>
+                  <linearGradient id="pgrad" x1="0" x2="1">
+                    <stop offset="0" stop-color="#0b0b0b" stop-opacity="0.9" />
+                    <stop offset="1" stop-color="#1a1a1a" stop-opacity="0.6" />
+                  </linearGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#pgrad)" rx="8" />
+                <g transform="translate(28,18) scale(0.9)" fill="#79c3ff" opacity="0.95">
+                  <ellipse cx="80" cy="60" rx="36" ry="36" />
+                  <path d="M80 34c8 6 22 7 28 20 6 13-4 26-20 30s-26-6-30-18 4-26 22-32z" fill="#ffffff" opacity="0.08" />
+                </g>
+                <text x="18" y="180" fill="#f3f4f6" font-family="Inter, system-ui, -apple-system, Roboto, Arial" font-size="14">Huile CBD 10% — flacon</text>
+              </svg>
+              <div class="price-badge">19,90 €</div>
+            </div>
+            <div>
+              <h3 class="name" id="p1-name">Huile CBD 10% — Nature</h3>
+              <p class="cat">Huile · 10 ml</p>
+            </div>
+          </article>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal détail produit -->
+    <div id="modal" class="modal" hidden aria-modal="true" role="dialog" aria-labelledby="dlgTitle">
+      <div class="dialog">
+        <div class="dialog-head">
+          <h2 id="dlgTitle" class="dialog-title"></h2>
+          <button id="closeBtn" class="close" aria-label="Fermer">✕</button>
+        </div>
+        <div class="detail">
+          <div>
+            <div class="viewer">
+              <button class="nav prev" id="prevBtn" aria-label="Précédent">‹</button>
+              <div class="stage" id="stage"></div>
+              <button class="nav next" id="nextBtn" aria-label="Suivant">›</button>
+            </div>
+            <div class="thumbs" id="thumbs" aria-label="Aperçus"></div>
+          </div>
+          <div class="meta">
+            <p id="mDesc" class="desc"></p>
+            <div id="mTiers" class="tiers" aria-label="Sélection de grammage"></div>
+            <div class="row meta-row">
+              <strong id="mPrice" class="price"></strong>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="cta">
+            <button id="contactBtn" class="btn" type="button">Contacter</button>
+            <!-- Bouton Préparer message supprimé -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden>Chargement…</div>
+
+    <!-- Fallback local pour développement / file:// : injecte un catalogue minimal si fetch échoue -->
+    <script>
+      window.__FALLBACK_CONFIG = {
+        title: 'CBD Shop · Démo',
+        subtitle: 'Mini‑app Telegram — catalogue de démonstration',
+        accent: '#79c3ff',
+        contact: { telegram: 'MonShopCBD' },
+        buttonText: 'Préparer message',
+        messageTemplate: 'Bonjour, je suis intéressé par {{name}} (ID {{id}}) — {{tier}} à {{tierPrice}}.'
+      };
+      window.__FALLBACK_CATALOG = {
+        products: [
+          { id: 'oil-10', name: 'Huile CBD 10%', category: 'Huiles', price: 29.9, farm: 'Alpine Farm', description: 'Huile de CBD 10% spectre large. Goût naturel.', media:[{type:'image',src:'https://picsum.photos/seed/oil10/800/500',thumb:'https://picsum.photos/seed/oil10/240/150'}] },
+          { id: 'flower-og', name: 'Fleur OG Kush', category: 'Fleurs', farm: 'Green Valley', price: 7.5, description: 'Fleur CBD OG Kush, arômes résineux et citronnés.', media:[{type:'image',src:'https://picsum.photos/seed/ogkush/800/500',thumb:'https://picsum.photos/seed/ogkush/240/150'}] },
+          { id: 'resin-hash', name: 'Résine Hash CBD', category: 'Résines', farm: 'Blue Mountain', price: 8.9, description: 'Résine CBD douce et parfumée.', media:[{type:'image',src:'https://picsum.photos/seed/hash/800/500',thumb:'https://picsum.photos/seed/hash/240/150'}] }
+        ]
+      };
+    </script>
+    <!-- Script applicatif externalisé -->
+    <script src="app.js" defer></script>
+    <!-- Harmonisation dynamique si config.json modifie --accent -->
+    <script>document.addEventListener('DOMContentLoaded',()=>{const a=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#24cfff';document.documentElement.style.setProperty('--accent-grad',`linear-gradient(135deg,${a} 0%, var(--accent2) 30%, var(--accent3) 65%, var(--accent4) 100%)`);});</script>
+  </body>
+</html>
