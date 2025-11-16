@@ -32,6 +32,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 🔒 SÉCURITÉ: Désactiver les logs httpx qui exposent l'API key dans les URLs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("telegram").setLevel(logging.WARNING)
+
 # Helper: redaction des numéros de téléphone et des clés sensibles
 PHONE_RE = re.compile(r"\+?[0-9][0-9()\-\s]{5,}[0-9]")
 
