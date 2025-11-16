@@ -6,6 +6,76 @@
 (function(){
   'use strict';
 
+  // --- Déplacer les fallbacks ici (au lieu de scripts inline bloqués par CSP) ---
+  if(typeof window.__FALLBACK_CONFIG === 'undefined'){
+    window.__FALLBACK_CONFIG = {
+      title: 'CBD Shop · Démo',
+      subtitle: 'Mini‑app Telegram — catalogue de démonstration',
+      accent: '#79c3ff',
+      contact: { telegram: 'MonShopCBD' },
+      buttonText: 'Préparer message',
+      messageTemplate: 'Bonjour, je suis intéressé par {{name}} (ID {{id}}) — {{tier}} à {{tierPrice}}.'
+    };
+  }
+  if(typeof window.__FALLBACK_CATALOG === 'undefined'){
+    window.__FALLBACK_CATALOG = {
+      products: [
+        { id: 'oil-10', name: 'Huile CBD 10%', category: 'Huiles', price: 29.9, farm: 'Alpine Farm', description: 'Huile de CBD 10% spectre large. Goût naturel.', media:[{type:'image',src:'https://picsum.photos/seed/oil10/800/500',thumb:'https://picsum.photos/seed/oil10/240/150'}] },
+        { id: 'flower-og', name: 'Fleur OG Kush', category: 'Fleurs', farm: 'Green Valley', price: 7.5, description: 'Fleur CBD OG Kush, arômes résineux et citronnés.', media:[{type:'image',src:'https://picsum.photos/seed/ogkush/800/500',thumb:'https://picsum.photos/seed/ogkush/240/150'}] },
+        { id: 'resin-hash', name: 'Résine Hash CBD', category: 'Résines', farm: 'Blue Mountain', price: 8.9, description: 'Résine CBD douce et parfumée.', media:[{type:'image',src:'https://picsum.photos/seed/hash/800/500',thumb:'https://picsum.photos/seed/hash/240/150'}] }
+      ]
+    };
+  }
+
+  // Harmonisation dynamique de l'accent sans script inline
+  document.addEventListener('DOMContentLoaded',()=>{
+    const a = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#24cfff';
+    document.documentElement.style.setProperty('--accent-grad',`linear-gradient(135deg,${a} 0%, var(--accent2) 30%, var(--accent3) 65%, var(--accent4) 100%)`);
+
+    // UX: Header sticky effect
+    const header = document.querySelector('.header');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > 50) {
+        header?.classList.add('scrolled');
+      } else {
+        header?.classList.remove('scrolled');
+      }
+      lastScroll = currentScroll;
+    }, { passive: true });
+
+    // UX: Filter bar scroll indicators
+    const filterBarContainer = document.querySelector('.filter-bar-container');
+    const filterBar = document.querySelector('.filter-bar');
+
+    function updateScrollIndicators() {
+      if (!filterBar || !filterBarContainer) return;
+      const { scrollLeft, scrollWidth, clientWidth } = filterBar;
+
+      // Left gradient
+      if (scrollLeft > 10) {
+        filterBarContainer.classList.add('has-scroll-left');
+      } else {
+        filterBarContainer.classList.remove('has-scroll-left');
+      }
+
+      // Right gradient
+      if (scrollLeft < scrollWidth - clientWidth - 10) {
+        filterBarContainer.classList.add('has-scroll-right');
+      } else {
+        filterBarContainer.classList.remove('has-scroll-right');
+      }
+    }
+
+    if (filterBar) {
+      filterBar.addEventListener('scroll', updateScrollIndicators, { passive: true });
+      // Initial check
+      setTimeout(updateScrollIndicators, 100);
+      window.addEventListener('resize', updateScrollIndicators, { passive: true });
+    }
+  });
+
   const DEFAULT_CLIENT = 'demo';
   const qs = new URLSearchParams(location.search);
   const slug = (qs.get('client')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'') || DEFAULT_CLIENT;
@@ -64,7 +134,7 @@
 
   async function init(){
     showToast('Chargement…');
-    // 1) Rendu immédiat depuis fallback si présent (UX: produits visibles "déjà" dans l'app)
+    // Rendu immédiat depuis fallback si présent (UX)
     const fbConfig = window.__FALLBACK_CONFIG;
     const fbCatalog = window.__FALLBACK_CATALOG;
     if(fbConfig){ state.config = fbConfig; hydrateConfig(); }
@@ -75,10 +145,9 @@
     }
     if(!eventsBound){ bindEvents(); }
 
-    // 2) Mise à jour avec les vraies données (si dispo) — sans casser l'affichage
-    let config=null, catalog=null;
+    // Mise à jour avec les vraies données
     try {
-      [config, catalog] = await Promise.all([
+      const [config, catalog] = await Promise.all([
         loadJSON(`config.json`),
         loadJSON(`catalog.json`)
       ]);
@@ -90,13 +159,9 @@
       }
       showToast('Prêt', 900);
     } catch(err){
-      // si aucun fallback n'était dispo, afficher une erreur
+      console.warn('Fallback en cours (config/catalog)', err);
       if(!(fbCatalog && fbCatalog.products && fbCatalog.products.length)){
-        console.error(err);
-        showToast('Erreur de chargement');
-        if(els.grid) els.grid.innerHTML = `<p style=\"grid-column:1/-1;color:#f66\">Impossible de charger les données (config.json / catalog.json).</p>`;
-      } else {
-        console.warn('Using fallback catalog/config at root', err);
+        if(els.grid) els.grid.innerHTML = `<p style="grid-column:1/-1;color:#f66">Impossible de charger les données.</p>`;
       }
     }
   }
@@ -105,11 +170,7 @@
     const c = state.config || {};
     if(c.title) els.appTitle.textContent = c.title;
     if(c.subtitle) els.appSub.textContent = c.subtitle;
-    if(c.theme){
-      for(const [k,v] of Object.entries(c.theme||{})){
-        document.documentElement.style.setProperty(`--${k}`, v);
-      }
-    }
+    if(c.theme){ for(const [k,v] of Object.entries(c.theme||{})){ document.documentElement.style.setProperty(`--${k}`, v); } }
     if(c.accent){
       document.documentElement.style.setProperty('--tg-theme-button-color', c.accent);
       document.documentElement.style.setProperty('--tg-theme-link-color', c.accent);
@@ -120,9 +181,9 @@
 
   function buildFilters(){
     const cats = new Set(state.products.map(p=>p.category).filter(Boolean));
-    const container = els.filters;
-    if(!container) return;
+    const container = els.filters; if(!container) return;
     container.innerHTML = '';
+
     const allBtn = makeChip('Tous', 'ALL');
     allBtn.setAttribute('aria-pressed','true');
     container.appendChild(allBtn);
@@ -141,37 +202,26 @@
     b.setAttribute('aria-pressed','false');
     b.addEventListener('click', ()=>{
       state.activeCategory = value;
-      // Mettre à jour l'état visuel des chips
       [...els.filters.querySelectorAll('.chip')].forEach(c=>c.setAttribute('aria-pressed', c===b?'true':'false'));
-      // Mettre à jour les options de ferme selon la catégorie active
       updateFarmOptions();
       applyFilter();
     });
     return b;
   }
 
-  // Construit le select des fermes et le monte dans la barre des filtres
   function buildFarmSelect(){
     const container = els.filters; if(!container) return;
-    // Si déjà créé, on réutilise l'élément
     if(!farmSelectEl){
       farmSelectEl = document.createElement('select');
       farmSelectEl.id = 'farmFilter';
       farmSelectEl.setAttribute('aria-label','Filtrer par ferme');
-      // Style approchant les chips
       farmSelectEl.className = 'farm-select';
-      farmSelectEl.addEventListener('change', ()=>{
-        state.activeFarm = farmSelectEl.value || 'ALL';
-        applyFilter();
-      });
+      farmSelectEl.addEventListener('change', ()=>{ state.activeFarm = farmSelectEl.value || 'ALL'; applyFilter(); });
     }
-    // Insérer à la fin des filtres
     if(!container.contains(farmSelectEl)) container.appendChild(farmSelectEl);
-    // Peupler les options selon la catégorie active
     updateFarmOptions();
   }
 
-  // Récupère la liste unique des fermes pour une catégorie donnée (ou toutes)
   function collectFarms(category){
     const farms = new Set();
     (state.products||[]).forEach(p=>{
@@ -182,37 +232,23 @@
     return [...farms].sort((a,b)=>a.localeCompare(b,'fr'));
   }
 
-  // Met à jour les options du select ferme et conserve la sélection si possible
   function updateFarmOptions(){
     if(!farmSelectEl) return;
     const farms = collectFarms(state.activeCategory);
     const prev = state.activeFarm;
     farmSelectEl.innerHTML = '';
-    const optAll = document.createElement('option');
-    optAll.value = 'ALL';
-    optAll.textContent = 'Toutes les fermes';
-    farmSelectEl.appendChild(optAll);
-    farms.forEach(f=>{
-      const o = document.createElement('option'); o.value = f; o.textContent = f; farmSelectEl.appendChild(o);
-    });
-    // Restaurer sélection si encore valide, sinon ALL
-    if(prev !== 'ALL' && farms.includes(prev)){
-      farmSelectEl.value = prev; state.activeFarm = prev;
-    } else {
-      farmSelectEl.value = 'ALL'; state.activeFarm = 'ALL';
-    }
+    const optAll = document.createElement('option'); optAll.value = 'ALL'; optAll.textContent = 'Toutes les fermes'; farmSelectEl.appendChild(optAll);
+    farms.forEach(f=>{ const o = document.createElement('option'); o.value = f; o.textContent = f; farmSelectEl.appendChild(o); });
+    if(prev !== 'ALL' && farms.includes(prev)){ farmSelectEl.value = prev; state.activeFarm = prev; }
+    else { farmSelectEl.value = 'ALL'; state.activeFarm = 'ALL'; }
   }
 
   function applyFilter(){
     const q = (state.search||'').trim().toLowerCase();
     state.filtered = state.products.filter(p=>{
-      // Disponible par défaut si non défini
-      const availOk = p.available !== false;
-      if(!availOk) return false;
-      const catOk = state.activeCategory==='ALL' || p.category===state.activeCategory;
-      if(!catOk) return false;
-      const farmOk = state.activeFarm==='ALL' || p.farm===state.activeFarm;
-      if(!farmOk) return false;
+      const availOk = p.available !== false; if(!availOk) return false;
+      const catOk = state.activeCategory==='ALL' || p.category===state.activeCategory; if(!catOk) return false;
+      const farmOk = state.activeFarm==='ALL' || p.farm===state.activeFarm; if(!farmOk) return false;
       if(!q) return true;
       return (p.name&&p.name.toLowerCase().includes(q)) || (p.description&&p.description.toLowerCase().includes(q));
     });
@@ -220,123 +256,76 @@
   }
 
   function renderProducts(){
-    const list = state.filtered;
-    if(!els.grid) return;
+    const list = state.filtered; if(!els.grid) return;
     if(!list.length){
-      els.grid.innerHTML = '<p style=\"grid-column:1/-1;opacity:.6\">Aucun produit.</p>';
+      els.grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-size:1.1rem">✨ Aucun produit disponible pour ces filtres</p>';
       return;
     }
-    els.grid.innerHTML = list.map(p=>{
+    els.grid.innerHTML = list.map((p, idx)=>{
       const price = priceBadgeText(p);
-      const img = (p.media && p.media[0] && p.media[0].thumb) || (p.media && p.media[0] && p.media[0].src) || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=300 height=180><rect width=100% height=100% fill=%22%23333%22/><text x=50% y=50% font-size=20 fill=%22%23aaa%22 text-anchor=%22middle%22 dy=.35em>Image</text></svg>';
-      const info = [p.category||'', p.farm||''].filter(Boolean).join(' · ');
-      return `<button class=\"card\" type=\"button\" data-id=\"${encodeURIComponent(p.id)}\">\n        <div class=\"media\">\n          <img loading=\"lazy\" src=\"${img}\" alt=\"${escapeHTML(p.name)}\" />\n          <span class=\"price-badge\">${price}</span>\n        </div>\n        <h3 class=\"name\">${escapeHTML(p.name)}</h3>\n        <p class=\"cat\">${escapeHTML(info)}</p>\n      </button>`;
+      const img = (p.media && p.media[0] && p.media[0].thumb) || (p.media && p.media[0] && p.media[0].src) || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=300 height=220><rect width=100% height=100% fill=%22%2315161f%22/><text x=50% y=50% font-size=18 fill=%22%238b92a7%22 text-anchor=%22middle%22 dy=.35em>Image</text></svg>';
+      const info = [p.category||'', p.farm||''].filter(Boolean).join(' • ');
+      const delay = Math.min(idx * 0.05, 0.3);
+      return `<button class="card" type="button" data-id="${encodeURIComponent(p.id)}" style="animation-delay: ${delay}s">
+        <div class="media">
+          <img loading="lazy" src="${img}" alt="${escapeHTML(p.name)}" />
+          <span class="price-badge">${price}</span>
+        </div>
+        <div class="card-content">
+          <h3 class="name">${escapeHTML(p.name)}</h3>
+          <p class="cat">${escapeHTML(info)}</p>
+        </div>
+      </button>`;
     }).join('');
-
-    // add listeners to each card (for keyboard accessibility as well)
     els.grid.querySelectorAll('.card').forEach(card=>card.addEventListener('click',()=>openProduct(decodeURIComponent(card.dataset.id))));
   }
 
-  function formatPrice(v){
-    if(v==null) return '';
-    const n = Number(v);
-    if(Number.isNaN(n)) return v;
-    return n.toLocaleString('fr-FR', {style:'currency', currency:'EUR'});
-  }
-
-  function escapeHTML(s){
-    return (s||'').replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-  }
+  function formatPrice(v){ if(v==null) return ''; const n = Number(v); if(Number.isNaN(n)) return v; return n.toLocaleString('fr-FR', {style:'currency', currency:'EUR'}); }
+  function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
 
   function openProduct(id){
-    const p = state.products.find(x=>String(x.id)===String(id));
-    if(!p) return;
-    state.activeProduct = p;
-    state.mediaIndex = 0;
-    els.dlgTitle.textContent = p.name;
-    els.mDesc.textContent = p.description||'';
-    const tiers = getTiers(p);
-    state.activeTierIndex = tiers.length ? 0 : null;
+    const p = state.products.find(x=>String(x.id)===String(id)); if(!p) return;
+    state.activeProduct = p; state.mediaIndex = 0;
+    els.dlgTitle.textContent = p.name; els.mDesc.textContent = p.description||'';
+    const tiers = getTiers(p); state.activeTierIndex = tiers.length ? 0 : null;
     els.mPrice.textContent = formatPrice(getActivePrice());
-    renderMedia();
-    renderThumbs();
-    renderTiers();
-    els.modal.hidden = false;
-    previousActive = document.activeElement;
-    els.closeBtn.focus();
-    document.addEventListener('keydown', escListener);
+    renderMedia(); renderThumbs(); renderTiers();
+    els.modal.hidden = false; previousActive = document.activeElement; els.closeBtn.focus(); document.addEventListener('keydown', escListener);
   }
-
-  function closeModal(){
-    els.modal.hidden = true;
-    document.removeEventListener('keydown', escListener);
-    if(previousActive && previousActive.focus) previousActive.focus();
-  }
-
+  function closeModal(){ els.modal.hidden = true; document.removeEventListener('keydown', escListener); if(previousActive && previousActive.focus) previousActive.focus(); }
   function escListener(e){ if(e.key==='Escape') closeModal(); }
   let previousActive = null;
 
   function renderMedia(){
-    const p = state.activeProduct; if(!p) return;
-    const m = (p.media||[])[state.mediaIndex];
-    els.stage.innerHTML = '';
+    const p = state.activeProduct; if(!p) return; const m = (p.media||[])[state.mediaIndex]; els.stage.innerHTML = '';
     if(!m){ els.stage.textContent = 'Aucun média'; return; }
-    if(m.type==='video'){
-      const vid = document.createElement('video'); vid.src = m.src; vid.controls = true; vid.playsInline = true; els.stage.appendChild(vid);
-    } else {
-      const img = document.createElement('img'); img.src = m.src; img.alt = p.name; els.stage.appendChild(img);
-    }
+    if(m.type==='video'){ const vid = document.createElement('video'); vid.src = m.src; vid.controls = true; vid.playsInline = true; els.stage.appendChild(vid); }
+    else { const img = document.createElement('img'); img.src = m.src; img.alt = p.name; els.stage.appendChild(img); }
     updateNavButtons();
   }
-
   function renderThumbs(){
     const p = state.activeProduct; if(!p) return;
-    els.thumbs.innerHTML = (p.media||[]).map((m,i)=>{
-      const src = m.thumb || m.src;
-      return `<button class=\"thumb\" type=\"button\" data-i=\"${i}\" aria-selected=\"${i===state.mediaIndex}\" style=\"background-image:url('${src}')\"></button>`;
-    }).join('');
+    els.thumbs.innerHTML = (p.media||[]).map((m,i)=>{ const src = m.thumb || m.src; return `<button class="thumb" type="button" data-i="${i}" aria-selected="${i===state.mediaIndex}" style="background-image:url('${src}')"></button>`; }).join('');
     els.thumbs.querySelectorAll('.thumb').forEach(b=>b.addEventListener('click',()=>{ state.mediaIndex=Number(b.dataset.i); renderMedia(); renderThumbs(); }));
   }
 
-  // Rendu des options de grammage
   function renderTiers(){
     const p = state.activeProduct; if(!p || !els.mTiers) return;
-    const tiers = getTiers(p);
-    els.mTiers.innerHTML = '';
+    const tiers = getTiers(p); els.mTiers.innerHTML = '';
     if(!tiers.length){ els.mTiers.hidden = true; return; }
     els.mTiers.hidden = false;
     tiers.forEach((t,i)=>{
-      const b = document.createElement('button');
-      b.className = 'option';
-      b.type = 'button';
-      b.textContent = `${t.label} — ${formatPrice(t.price)}`;
-      b.setAttribute('aria-pressed', String(i===state.activeTierIndex));
-      b.addEventListener('click', ()=>{
-        state.activeTierIndex = i;
-        els.mPrice.textContent = formatPrice(getActivePrice());
-        els.mTiers.querySelectorAll('.option').forEach((x,idx)=>x.setAttribute('aria-pressed', String(idx===state.activeTierIndex)));
-      });
+      const b = document.createElement('button'); b.className = 'option'; b.type = 'button'; b.textContent = `${t.label} — ${formatPrice(t.price)}`; b.setAttribute('aria-pressed', String(i===state.activeTierIndex));
+      b.addEventListener('click', ()=>{ state.activeTierIndex = i; els.mPrice.textContent = formatPrice(getActivePrice()); els.mTiers.querySelectorAll('.option').forEach((x,idx)=>x.setAttribute('aria-pressed', String(idx===state.activeTierIndex))); });
       els.mTiers.appendChild(b);
     });
   }
 
-  function updateNavButtons(){
-    const p = state.activeProduct; if(!p) return;
-    const len = (p.media||[]).length;
-    els.prevBtn.disabled = state.mediaIndex<=0;
-    els.nextBtn.disabled = state.mediaIndex>=len-1;
-  }
-
-  function nextMedia(delta){
-    const p = state.activeProduct; if(!p) return;
-    const len = (p.media||[]).length; if(!len) return;
-    state.mediaIndex = Math.min(len-1, Math.max(0, state.mediaIndex+delta));
-    renderMedia(); renderThumbs();
-  }
+  function updateNavButtons(){ const p = state.activeProduct; if(!p) return; const len = (p.media||[]).length; els.prevBtn.disabled = state.mediaIndex<=0; els.nextBtn.disabled = state.mediaIndex>=len-1; }
+  function nextMedia(delta){ const p = state.activeProduct; if(!p) return; const len = (p.media||[]).length; if(!len) return; state.mediaIndex = Math.min(len-1, Math.max(0, state.mediaIndex+delta)); renderMedia(); renderThumbs(); }
 
   function bindEvents(){
-    if(eventsBound) return; // éviter doublons
-    eventsBound = true;
+    if(eventsBound) return; eventsBound = true;
     if(els.search) els.search.addEventListener('input', ()=>{ state.search = els.search.value; applyFilter(); });
     if(els.closeBtn) els.closeBtn.addEventListener('click', closeModal);
     if(els.contactBtn) els.contactBtn.addEventListener('click', contactSeller);
@@ -345,59 +334,31 @@
     if(els.nextBtn) els.nextBtn.addEventListener('click', ()=>nextMedia(1));
     if(els.modal) els.modal.addEventListener('click', e=>{ if(e.target===els.modal) closeModal(); });
 
-    // Delegation: open product when user clicks any element inside a product card or static article[data-id]
     if(els.grid){
       els.grid.addEventListener('click', e=>{
-        let t = e.target;
-        // si Text node, remonter à l'élément parent
-        if(t && t.nodeType===3) t = t.parentElement;
-        const el = (t && t.closest) ? t.closest('[data-id]') : null;
-        if(el && els.grid.contains(el)){
-          const id = el.dataset.id || el.getAttribute('data-id');
-          if(id) openProduct(id);
-        }
+        let t = e.target; if(t && t.nodeType===3) t = t.parentElement; const el = (t && t.closest) ? t.closest('[data-id]') : null;
+        if(el && els.grid.contains(el)){ const id = el.dataset.id || el.getAttribute('data-id'); if(id) openProduct(id); }
       });
-      // Activation clavier (Enter/Espace) sur éléments focusables dans la grille
       els.grid.addEventListener('keydown', e=>{
-        if(e.key!=="Enter" && e.key!==" ") return;
-        let t = e.target;
-        if(t && t.nodeType===3) t = t.parentElement;
-        const el = (t && t.closest) ? t.closest('[data-id]') : null;
-        if(el && els.grid.contains(el)){
-          e.preventDefault();
-          const id = el.dataset.id || el.getAttribute('data-id');
-          if(id) openProduct(id);
-        }
+        if(e.key!=="Enter" && e.key!==" ") return; let t = e.target; if(t && t.nodeType===3) t = t.parentElement; const el = (t && t.closest) ? t.closest('[data-id]') : null;
+        if(el && els.grid.contains(el)){ e.preventDefault(); const id = el.dataset.id || el.getAttribute('data-id'); if(id) openProduct(id); }
       });
-      // Fallback: s'assurer que les éléments statiques [data-id] sont cliquables sans dépendre de la délégation
-      els.grid.querySelectorAll('[data-id]').forEach(node=>{
-        node.addEventListener('click', ()=>{
-          const id = node.dataset.id || node.getAttribute('data-id');
-          if(id) openProduct(id);
-        }, { once: true });
-      });
+      els.grid.querySelectorAll('[data-id]').forEach(node=>{ node.addEventListener('click', ()=>{ const id = node.dataset.id || node.getAttribute('data-id'); if(id) openProduct(id); }, { once: true }); });
     }
 
-    // clear button
     const clear = document.querySelector('.search .clear');
     if(clear) clear.addEventListener('click', ()=>{ if(els.search){ els.search.value=''; state.search=''; applyFilter(); } });
   }
 
   function contactSeller(){
     const username = state.config && state.config.contact && state.config.contact.telegram;
-    if(username){
-      const url = `https://t.me/${username.replace(/^@/,'')}`;
-      openExternal(url);
-    } else {
-      showToast('Aucun contact configuré');
-    }
+    if(username){ const url = `https://t.me/${username.replace(/^@/,'')}`; openExternal(url); }
+    else { showToast('Aucun contact configuré'); }
   }
 
   function prepareMessage(){
     const p = state.activeProduct; if(!p){ showToast('Ouvrez un produit'); return; }
-    const tiers = getTiers(p);
-    const chosen = (tiers.length && state.activeTierIndex!=null) ? tiers[state.activeTierIndex] : null;
-    const chosenPrice = chosen ? chosen.price : (p.price!=null ? p.price : null);
+    const tiers = getTiers(p); const chosen = (tiers.length && state.activeTierIndex!=null) ? tiers[state.activeTierIndex] : null; const chosenPrice = chosen ? chosen.price : (p.price!=null ? p.price : null);
 
     const templ = (state.config && state.config.messageTemplate) || 'Bonjour, je suis intéressé par {{name}} (ID {{id}}) au prix de {{price}}.';
     let text = templ.replace(/{{\s*name\s*}}/g,p.name)
