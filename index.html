@@ -1210,12 +1210,31 @@
       location.reload();
     });
 
-    // Check if already authenticated
-    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+    // Détecte si on est sur la route admin (supporte /admin et /admin.html)
+    const isAdminRoute = location.pathname === '/admin' || location.pathname === '/admin.html' || location.pathname.endsWith('/admin');
+
+    // Si on n'est pas sur /admin, masquer l'UI admin et garder la page "publique"
+    if (!isAdminRoute) {
+      // Masque les éléments d'admin (login et interface)
       els.loginScreen.style.display = 'none';
-      els.adminInterface.classList.add('active');
-      loadCatalog();
+      els.adminInterface.style.display = 'none';
+
+      // Optionnel : afficher un petit lien vers /admin pour y accéder
+      const banner = document.createElement('div');
+      banner.style.cssText = 'padding:20px;text-align:center;background:transparent';
+      banner.innerHTML = `<a href="/admin" style="color:var(--accent);text-decoration:none;font-weight:600">Accéder à l'interface admin</a>`;
+      document.body.prepend(banner);
+
+    // Si on est sur /admin, utiliser l'auth existante
+    } else {
+      // Vérifier si déjà authentifié (comportement inchangé)
+      if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        els.loginScreen.style.display = 'none';
+        els.adminInterface.classList.add('active');
+        loadCatalog();
+      }
     }
+
 
     // ===== Utility Functions =====
     function setStatus(msg) {
