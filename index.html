@@ -12,8 +12,7 @@
       --accent:#24cfff; --accent-alt:#0079ff;
       --accent-grad:linear-gradient(135deg,var(--accent) 0%,var(--accent-alt) 100%);
       --success:#4ade80; --warning:#fbbf24; --danger:#f87171;
-      --radius:12px; --radius-sm:8px; --shadow: 0 4px 24px rgba(0,0,0,0.4);
-      --transition: all 0.2s ease;
+      --radius:12px;
     }
 
     /* Base Reset */
@@ -45,61 +44,45 @@
 
     /* ===== Mobile Nav / Filters (SCROLLABLE) ===== */
     .category-nav {
-      position: sticky; top: 53px; /* Juste sous le header */
-      z-index: 90;
+      position: sticky; top: 53px; z-index: 90;
       background: rgba(10, 10, 15, 0.95);
       border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
-      display: flex; gap: 10px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch; /* Scroll fluide iOS */
-      scrollbar-width: none; /* Cache scrollbar Firefox */
+      padding: 10px 16px; display: flex; gap: 10px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
-    .category-nav::-webkit-scrollbar { display: none; } /* Cache scrollbar Chrome/Safari */
+    .category-nav::-webkit-scrollbar { display: none; }
 
     .cat-pill {
-      flex-shrink: 0;
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--muted);
-      font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: var(--transition);
+      flex-shrink: 0; padding: 6px 16px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--card); color: var(--muted);
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
     .cat-pill.active {
       background: var(--accent); color: #fff; border-color: var(--accent);
       box-shadow: 0 2px 10px rgba(36, 207, 255, 0.3);
     }
 
-    /* ===== Shop Grid (Mobile optimized) ===== */
+    /* ===== Shop Grid ===== */
     .shop-container { max-width: 1000px; margin: 0 auto; padding: 16px; }
-
-    /* Affichage grille responsive : 2 colonnes sur mobile, plus sur desktop */
-    .shop-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (min-width: 600px) { .shop-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } }
 
     .shop-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden;
-      display: flex; flex-direction: column;
+      border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
+      cursor: pointer; /* Indique qu'on peut cliquer */
+      transition: transform 0.2s;
     }
-    .card-media {
-      aspect-ratio: 1; /* Carré parfait */
-      background: #000; position: relative; overflow: hidden;
-    }
-    .card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .shop-card:active { transform: scale(0.98); }
+    .card-media { aspect-ratio: 1; background: #000; position: relative; overflow: hidden; }
+    .card-media img { width: 100%; height: 100%; object-fit: cover; }
     .card-info { padding: 12px; flex: 1; display: flex; flex-direction: column; }
     .card-cat { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
     .card-title { font-size: 14px; margin: 0 0 4px; font-weight: 600; line-height: 1.3; }
-    .card-farm { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .card-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .card-price { margin-top: auto; font-size: 15px; font-weight: 700; color: #fff; }
 
-    /* ===== Buttons ===== */
+    /* ===== Buttons & Inputs ===== */
     .btn {
       padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
       background: var(--card); color: white; font-size: 13px; font-weight: 600;
@@ -109,7 +92,7 @@
     .btn.danger { background: rgba(248, 113, 113, 0.2); border-color: var(--danger); color: var(--danger); }
     .btn.small { padding: 6px 10px; font-size: 12px; }
 
-    /* ===== Login Modal ===== */
+    /* ===== Login ===== */
     #loginScreen {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
       display: none; align-items: center; justify-content: center; padding: 20px;
@@ -126,19 +109,33 @@
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface); font-size: 13px; }
     th { color: var(--muted); font-size: 11px; text-transform: uppercase; background: var(--card); }
 
-    /* Modal Form */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: flex-end; justify-content: center; }
+    /* ===== Modals (Edit & View) ===== */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; justify-content: center; backdrop-filter: blur(5px); }
     .modal.active { display: flex; }
     .modal-content {
       background: var(--surface); width: 100%; max-width: 600px;
       border-radius: 20px 20px 0 0; border-top: 1px solid var(--border);
-      padding: 24px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s;
+      padding: 24px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s;
+      position: relative;
     }
     @media(min-width: 600px) { .modal { align-items: center; } .modal-content { border-radius: var(--radius); } }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    input[type="text"], input[type="number"] { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 8px; margin-bottom: 12px; }
-    label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+    /* Styles spécifiques formulaires */
+    input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 8px; margin-bottom: 12px; font-family: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    label { font-size: 12px; color: var(--accent); margin-bottom: 4px; display: block; font-weight: 600; }
+    .img-preview { width: 100%; height: 150px; background: #000; border-radius: 8px; margin-bottom: 12px; object-fit: contain; border: 1px dashed var(--border); display: none; }
+    .img-preview.show { display: block; }
+
+    /* Styles spécifiques Fiche Produit (View) */
+    .detail-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: var(--radius); margin-bottom: 20px; }
+    .detail-cat { display: inline-block; padding: 4px 10px; border-radius: 20px; background: rgba(36, 207, 255, 0.15); color: var(--accent); font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+    .detail-title { font-size: 24px; margin: 0 0 8px 0; line-height: 1.2; }
+    .detail-farm { font-size: 14px; color: var(--muted); margin-bottom: 20px; display: flex; align-items: center; gap: 6px; }
+    .detail-desc { font-size: 15px; line-height: 1.6; color: #d1d5db; white-space: pre-wrap; margin-bottom: 24px; }
+    .detail-price { font-size: 28px; font-weight: 800; color: #fff; }
+    .close-modal-btn { position: absolute; top: 15px; right: 15px; background: var(--card); border: 1px solid var(--border); color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 10; }
 
   </style>
 </head>
@@ -153,33 +150,53 @@
     </header>
 
     <nav class="category-nav" id="categoryNav">
-      <button class="cat-pill active" data-cat="all">Tout</button>
       </nav>
 
     <main class="shop-container">
       <div id="shopGrid" class="shop-grid">
-        <div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">
-          Chargement...
-        </div>
+        <div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px;">Chargement...</div>
       </div>
     </main>
   </div>
 
+  <div id="viewProductModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal-btn" id="btnCloseView">×</button>
+
+      <img id="viewImg" class="detail-img" src="" alt="">
+
+      <div>
+        <span id="viewCat" class="detail-cat">CATÉGORIE</span>
+        <h2 id="viewName" class="detail-title">Nom du produit</h2>
+        <div id="viewFarm" class="detail-farm">🌿 Ferme</div>
+      </div>
+
+      <div id="viewPrice" class="detail-price">0.00 €</div>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+
+      <div style="color:var(--muted); font-size:12px; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Description</div>
+      <div id="viewDesc" class="detail-desc">
+        Description complète ici...
+      </div>
+
+      <button class="btn primary" style="width:100%; padding: 14px; font-size:16px;" onclick="document.getElementById('btnCloseView').click()">Fermer</button>
+    </div>
+  </div>
 
   <div id="loginScreen">
     <div class="login-box">
       <h2 style="margin:0 0 10px;">Administration</h2>
-      <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Entrez le code pour gérer le stock.</p>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Code secret requis</p>
       <form id="loginForm">
-        <input type="password" id="accessCode" class="login-input" placeholder="Code secret" autocomplete="off" required>
+        <input type="password" id="accessCode" class="login-input" placeholder="Code..." autocomplete="off" required>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <button type="button" id="btnCancelLogin" class="btn">Retour</button>
-          <button type="submit" class="btn primary">Connexion</button>
+          <button type="submit" class="btn primary">Entrer</button>
         </div>
       </form>
     </div>
   </div>
-
 
   <div id="adminInterface">
     <header>
@@ -194,7 +211,7 @@
 
     <main class="admin-wrap">
       <div class="toolbar">
-        <button id="btnAddProduct" class="btn primary">+ Nouveau</button>
+        <button id="btnAddProduct" class="btn primary">+ Nouveau Produit</button>
         <button id="btnSave" class="btn success">💾 Sauvegarder</button>
         <button id="btnImport" class="btn">📂 Importer</button>
         <input type="file" id="fileImport" style="display:none" accept=".json">
@@ -205,11 +222,10 @@
           <thead>
             <tr>
               <th>Img</th>
-              <th>Nom</th>
-              <th>Cat</th>
+              <th>Produit</th>
+              <th>Catégorie</th>
               <th>Prix</th>
-              <th>État</th>
-              <th>Actions</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="adminTableBody"></tbody>
@@ -217,37 +233,40 @@
       </div>
 
       <details style="margin-top:20px;">
-        <summary style="color:var(--muted); cursor:pointer;">JSON Brut</summary>
-        <textarea id="jsonArea" readonly style="width:100%; height:150px; background:#000; color:#0f0; border:none; margin-top:10px; font-family:monospace; font-size:11px;"></textarea>
+        <summary style="color:var(--muted); cursor:pointer;">JSON (Debug)</summary>
+        <textarea id="jsonArea" readonly style="width:100%; height:100px; background:#000; font-size:10px;"></textarea>
       </details>
     </main>
   </div>
-
 
   <div id="productModal" class="modal">
     <div class="modal-content">
       <h3 id="modalTitle" style="margin-top:0">Produit</h3>
       <form id="productForm">
-        <label>Nom du produit</label>
+
+        <label>Image du produit (Cliquez pour ajouter)</label>
+        <img id="previewImg" class="img-preview" alt="Aperçu">
+        <input type="file" id="pFile" accept="image/*" style="margin-bottom: 20px;">
+        <input type="hidden" id="pBase64">
+
+        <label>Nom</label>
         <input type="text" id="pName" required placeholder="Ex: Amnesia Haze">
 
-        <label>Catégorie (pour les filtres)</label>
-        <input type="text" id="pCat" required placeholder="Ex: Fleurs">
+        <label>Catégorie</label>
+        <input type="text" id="pCat" required placeholder="Ex: Fleurs, Résines...">
 
-        <label>Producteur / Ferme</label>
+        <label>Description</label>
+        <textarea id="pDesc" placeholder="Description détaillée du produit..."></textarea>
+
+        <label>Ferme / Producteur</label>
         <input type="text" id="pFarm" placeholder="Ex: Green House">
 
         <label>Prix (€)</label>
         <input type="number" step="0.01" id="pPrice" placeholder="0.00">
 
-        <label>Image (URL)</label>
-        <input type="text" id="pImg" placeholder="https://...">
-
-        <div style="margin: 15px 0;">
-          <label style="display:flex; align-items:center; gap:10px; font-size:14px; color:#fff;">
-            <input type="checkbox" id="pAvailable" style="width:auto;"> Visible sur la boutique
-          </label>
-        </div>
+        <label style="display:flex; align-items:center; gap:10px; color:#fff; margin-top:10px;">
+          <input type="checkbox" id="pAvailable" style="width:auto; margin:0;"> Visible sur la boutique
+        </label>
 
         <div style="display:flex; gap:10px; margin-top:20px;">
           <button type="button" class="btn" id="modalClose" style="flex:1">Annuler</button>
@@ -257,114 +276,88 @@
     </div>
   </div>
 
-
   <script>
     // ===== CONFIGURATION =====
-    const ACCESS_CODE = 'admin2024'; // Vérifiez que c'est bien ce code que vous tapez
+    const ACCESS_CODE = 'admin2024';
 
-    // État de l'application
     let state = {
       products: [],
       editingId: null,
       activeCategory: 'all'
     };
 
-    // DOM Elements - On les sécurise au chargement
     let views = {};
 
     // ===== DÉMARRAGE =====
     window.addEventListener('DOMContentLoaded', () => {
-      // On récupère les éléments une fois la page chargée
       views = {
         public: document.getElementById('publicInterface'),
         admin: document.getElementById('adminInterface'),
         login: document.getElementById('loginScreen')
       };
-
       loadCatalog();
-      // On force la vue publique au démarrage
       switchView('public');
     });
 
-    // ===== NAVIGATION & VUES (Fonction Corrigée) =====
+    // ===== NAVIGATION =====
     function switchView(viewName) {
-      if (!views.public || !views.admin || !views.login) return;
-
-      // 1. On masque tout proprement
+      if (!views.public) return;
       views.public.classList.remove('view-active');
       views.admin.classList.remove('view-active');
-
-      // 2. On ferme le login de force
       views.login.classList.remove('active');
-      views.login.style.display = ''; // Nettoyage de style inline au cas où
 
-      // 3. On affiche la vue demandée
-      if (viewName === 'public') {
-        views.public.classList.add('view-active');
-      }
-      else if (viewName === 'admin') {
-        views.admin.classList.add('view-active');
-      }
+      if (viewName === 'public') views.public.classList.add('view-active');
+      else if (viewName === 'admin') views.admin.classList.add('view-active');
       else if (viewName === 'login') {
-        // Pour le login, on garde le fond 'public' visible derrière
         views.public.classList.add('view-active');
         views.login.classList.add('active');
       }
     }
 
-    // ===== GESTION LOGIN (Corrigé) =====
     document.getElementById('btnOpenLogin').addEventListener('click', () => switchView('login'));
-
-    document.getElementById('btnCancelLogin').addEventListener('click', (e) => {
-      e.preventDefault(); // Empêche rechargement
-      switchView('public');
-    });
+    document.getElementById('btnCancelLogin').addEventListener('click', (e) => { e.preventDefault(); switchView('public'); });
+    document.getElementById('btnLogout').addEventListener('click', () => switchView('public'));
+    document.getElementById('btnBackToShop').addEventListener('click', () => { renderPublicShop(); switchView('public'); });
 
     document.getElementById('loginForm').addEventListener('submit', (e) => {
-      e.preventDefault(); // CRUCIAL : Empêche le rechargement de la page
-
+      e.preventDefault();
       const input = document.getElementById('accessCode');
-      const val = input.value.trim(); // .trim() enlève les espaces accidentels
-
-      if (val === ACCESS_CODE) {
-        input.value = ''; // Vider le champ
-        try {
-          switchView('admin'); // Changer la vue
-          renderAdminTable();  // Mettre à jour le tableau
-        } catch (err) {
-          console.error("Erreur lors du passage à l'admin:", err);
-          alert("Une erreur est survenue, vérifiez la console.");
-        }
+      if (input.value.trim() === ACCESS_CODE) {
+        input.value = '';
+        switchView('admin');
+        renderAdminTable();
       } else {
-        alert('❌ Code incorrect ! Essayez: admin2024');
+        alert('❌ Code incorrect');
       }
     });
 
-    // Déconnexion
-    document.getElementById('btnLogout').addEventListener('click', () => switchView('public'));
-
-    document.getElementById('btnBackToShop').addEventListener('click', () => {
-      renderPublicShop(); // Rafraichir la boutique
-      switchView('public');
-    });
-
-    // ===== LOGIQUE DATA =====
+    // ===== DATA LOGIC =====
     async function loadCatalog() {
       try {
         const res = await fetch('catalog.json');
         if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.products)) {
-            state.products = data.products;
-          }
+          const json = await res.json();
+          state.products = json.products || [];
         }
-      } catch (e) {
-        console.log('Mode démo (pas de fichier catalog.json détecté)');
-      }
+      } catch (e) { console.log('Mode sans serveur'); }
       renderPublicShop();
     }
 
-    // Sauvegarde & Import
+    // Gestion Image (File to Base64)
+    document.getElementById('pFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('pBase64').value = evt.target.result; // Stocke le code
+          document.getElementById('previewImg').src = evt.target.result; // Affiche l'aperçu
+          document.getElementById('previewImg').classList.add('show');
+        };
+        reader.readAsDataURL(file); // Encode l'image
+      }
+    });
+
+    // Sauvegarder
     document.getElementById('btnSave').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify({products: state.products}, null, 2)], {type: 'application/json'});
       const a = document.createElement('a');
@@ -373,167 +366,179 @@
       a.click();
     });
 
+    // Importer
     document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
     document.getElementById('fileImport').addEventListener('change', async (e) => {
       if(!e.target.files[0]) return;
-      try {
-        const text = await e.target.files[0].text();
-        const json = JSON.parse(text);
-        state.products = json.products || [];
-        renderAdminTable();
-        alert('✅ Import réussi !');
-      } catch(err) { alert('❌ Erreur fichier JSON'); }
+      const text = await e.target.files[0].text();
+      state.products = JSON.parse(text).products || [];
+      renderAdminTable();
+      alert('Catalogue importé !');
     });
 
-    // ===== RENDU BOUTIQUE =====
+    // ===== RENDU PUBLIC =====
     function renderPublicShop() {
-      const categories = ['all', ...new Set(state.products.map(p => p.category).filter(Boolean))];
-      const nav = document.getElementById('categoryNav');
+      // Filtres
+      const cats = ['all', ...new Set(state.products.map(p => p.category).filter(Boolean))];
+      document.getElementById('categoryNav').innerHTML = cats.map(c => `
+        <button class="cat-pill ${state.activeCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">
+          ${c === 'all' ? 'Tout' : c}
+        </button>
+      `).join('');
 
-      if(nav) {
-        nav.innerHTML = categories.map(cat => {
-          const label = cat === 'all' ? 'Tout' : cat;
-          const activeClass = state.activeCategory === cat ? 'active' : '';
-          return `<button class="cat-pill ${activeClass}" onclick="setCategory('${cat}')">${label}</button>`;
-        }).join('');
-      }
-
-      let visibleProducts = state.products.filter(p => p.available !== false);
-      if (state.activeCategory !== 'all') {
-        visibleProducts = visibleProducts.filter(p => p.category === state.activeCategory);
-      }
+      // Grille
+      let list = state.products.filter(p => p.available !== false);
+      if (state.activeCategory !== 'all') list = list.filter(p => p.category === state.activeCategory);
 
       const grid = document.getElementById('shopGrid');
-      if (!grid) return;
-
-      if (visibleProducts.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--muted)">Aucun produit disponible.</div>`;
+      if (list.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Aucun produit ici.</div>';
         return;
       }
 
-      grid.innerHTML = visibleProducts.map(p => {
-        const img = (p.media && p.media[0]) ? (p.media[0].src || p.media[0].thumb) : 'https://placehold.co/400x400/222/fff?text=No+Image';
+      grid.innerHTML = list.map((p, index) => {
+        // On passe l'ID du produit à la fonction openProductDetail
+        const img = (p.media && p.media[0]) ? p.media[0].src : 'https://placehold.co/400?text=No+Img';
+        // Note: on utilise p.id s'il existe, sinon l'index (moins robuste)
         return `
-          <div class="shop-card">
-            <div class="card-media"><img src="${img}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="card-info">
-              <span class="card-cat">${p.category}</span>
-              <h3 class="card-title">${p.name}</h3>
-              ${p.farm ? `<div class="card-farm">🌿 ${p.farm}</div>` : ''}
-              <div class="card-price">${p.price ? Number(p.price).toFixed(2) + ' €' : '-'}</div>
-            </div>
+        <div class="shop-card" onclick="openProductDetail('${p.id || index}')">
+          <div class="card-media"><img src="${img}" loading="lazy"></div>
+          <div class="card-info">
+            <span class="card-cat">${p.category}</span>
+            <h3 class="card-title">${p.name}</h3>
+            ${p.description ? `<p class="card-desc">${p.description}</p>` : ''}
+            <div class="card-price">${p.price ? p.price + ' €' : '-'}</div>
           </div>
-        `;
+        </div>`;
       }).join('');
     }
 
-    window.setCategory = (cat) => {
-      state.activeCategory = cat;
-      renderPublicShop();
+    window.setCategory = (c) => { state.activeCategory = c; renderPublicShop(); };
+
+    // ===== VUE DÉTAIL PRODUIT =====
+    const viewModal = document.getElementById('viewProductModal');
+
+    window.openProductDetail = (idOrIndex) => {
+      // Trouver le produit (soit par ID, soit par index si ancien format)
+      let product = state.products.find(p => p.id == idOrIndex);
+      if(!product && typeof idOrIndex === 'number') product = state.products[idOrIndex];
+      if(!product) return; // Sécurité
+
+      // Remplir la modale
+      const img = (product.media && product.media[0]) ? product.media[0].src : 'https://placehold.co/600?text=No+Img';
+      document.getElementById('viewImg').src = img;
+      document.getElementById('viewCat').innerText = product.category || 'Non classé';
+      document.getElementById('viewName').innerText = product.name;
+      document.getElementById('viewFarm').innerText = product.farm ? '🌿 ' + product.farm : '';
+      document.getElementById('viewDesc').innerText = product.description || 'Aucune description.';
+      document.getElementById('viewPrice').innerText = product.price ? product.price + ' €' : 'Prix non renseigné';
+
+      // Afficher
+      viewModal.classList.add('active');
     };
+
+    document.getElementById('btnCloseView').addEventListener('click', () => viewModal.classList.remove('active'));
+
+    // Fermer si on clique en dehors
+    viewModal.addEventListener('click', (e) => {
+      if(e.target === viewModal) viewModal.classList.remove('active');
+    });
 
     // ===== RENDU ADMIN =====
     function renderAdminTable() {
+      document.getElementById('jsonArea').value = JSON.stringify({products: state.products}, null, 2);
       const tbody = document.getElementById('adminTableBody');
-      const jsonArea = document.getElementById('jsonArea');
 
-      if(jsonArea) jsonArea.value = JSON.stringify({products: state.products}, null, 2);
-      if(!tbody) return;
-
-      if(state.products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Aucun produit. Cliquez sur "+ Nouveau".</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = state.products.map((p, index) => {
-        const img = (p.media && p.media[0]) ? (p.media[0].src || p.media[0].thumb) : '';
-        const status = p.available !== false
-          ? '<span style="color:var(--success); font-weight:bold">Actif</span>'
-          : '<span style="color:var(--warning)">Masqué</span>';
-
+      tbody.innerHTML = state.products.map((p, i) => {
+        const img = (p.media && p.media[0]) ? p.media[0].src : '';
         return `
-          <tr>
-            <td>${img ? `<img src="${img}" style="width:32px;height:32px;border-radius:4px;object-fit:cover">` : '<span style="font-size:10px">No img</span>'}</td>
-            <td><strong>${p.name}</strong></td>
-            <td>${p.category}</td>
-            <td>${p.price || '-'}</td>
-            <td>${status}</td>
-            <td style="white-space:nowrap">
-              <button class="btn small" onclick="editProduct(${index})">✏️</button>
-              <button class="btn small danger" onclick="deleteProduct(${index})">🗑️</button>
-            </td>
-          </tr>
-        `;
+        <tr>
+          <td>${img ? `<img src="${img}" style="width:32px;height:32px;border-radius:4px;object-fit:cover">` : '-'}</td>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.category}</td>
+          <td>${p.price || ''}</td>
+          <td>
+            <button class="btn small" onclick="editProduct(${i})">✏️</button>
+            <button class="btn small danger" onclick="deleteProduct(${i})">🗑️</button>
+          </td>
+        </tr>`;
       }).join('');
     }
 
-    // ===== ÉDITION / AJOUT =====
+    // ===== MODAL ACTIONS (ADMIN) =====
     const modal = document.getElementById('productModal');
     const form = document.getElementById('productForm');
 
-    window.editProduct = (idx) => {
-      state.editingId = idx;
-      const p = state.products[idx];
-      document.getElementById('modalTitle').innerText = 'Modifier Produit';
+    window.editProduct = (i) => {
+      state.editingId = i;
+      const p = state.products[i];
+
+      document.getElementById('modalTitle').innerText = 'Modifier';
       document.getElementById('pName').value = p.name || '';
       document.getElementById('pCat').value = p.category || '';
+      document.getElementById('pDesc').value = p.description || '';
       document.getElementById('pFarm').value = p.farm || '';
       document.getElementById('pPrice').value = p.price || '';
-      document.getElementById('pImg').value = (p.media && p.media[0]) ? p.media[0].src : '';
       document.getElementById('pAvailable').checked = p.available !== false;
+
+      // Image Handling
+      const imgVal = (p.media && p.media[0]) ? p.media[0].src : '';
+      document.getElementById('pBase64').value = imgVal;
+      document.getElementById('pFile').value = ''; // Reset input file
+
+      if(imgVal) {
+        document.getElementById('previewImg').src = imgVal;
+        document.getElementById('previewImg').classList.add('show');
+      } else {
+        document.getElementById('previewImg').classList.remove('show');
+      }
+
       modal.classList.add('active');
     };
 
-    window.deleteProduct = (idx) => {
-      if(confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-        state.products.splice(idx, 1);
-        renderAdminTable();
-      }
+    window.deleteProduct = (i) => {
+      if(confirm('Supprimer ?')) { state.products.splice(i, 1); renderAdminTable(); }
     };
 
-    if(document.getElementById('btnAddProduct')) {
-      document.getElementById('btnAddProduct').addEventListener('click', () => {
-        state.editingId = null;
-        document.getElementById('modalTitle').innerText = 'Ajouter un Produit';
-        form.reset();
-        document.getElementById('pAvailable').checked = true;
-        modal.classList.add('active');
-      });
-    }
+    document.getElementById('btnAddProduct').addEventListener('click', () => {
+      state.editingId = null;
+      document.getElementById('modalTitle').innerText = 'Ajouter';
+      form.reset();
+      document.getElementById('pBase64').value = '';
+      document.getElementById('previewImg').classList.remove('show');
+      document.getElementById('pAvailable').checked = true;
+      modal.classList.add('active');
+    });
 
     document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('active'));
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      const priceVal = document.getElementById('pPrice').value;
-
       const p = {
         id: state.editingId !== null ? state.products[state.editingId].id : Date.now().toString(),
         name: document.getElementById('pName').value,
         category: document.getElementById('pCat').value,
+        description: document.getElementById('pDesc').value,
         farm: document.getElementById('pFarm').value,
-        price: priceVal ? parseFloat(priceVal) : null,
+        price: parseFloat(document.getElementById('pPrice').value),
         available: document.getElementById('pAvailable').checked,
         media: []
       };
 
-      const imgVal = document.getElementById('pImg').value;
-      if(imgVal) {
-        p.media.push({ type:'image', src: imgVal });
+      // Si une image est présente (soit nouvelle uploadée, soit ancienne conservée)
+      const imgData = document.getElementById('pBase64').value;
+      if(imgData) {
+        p.media.push({ type: 'image', src: imgData });
       }
 
-      if(state.editingId !== null) {
-        state.products[state.editingId] = p;
-      } else {
-        state.products.push(p);
-      }
+      if (state.editingId !== null) state.products[state.editingId] = p;
+      else state.products.push(p);
 
       modal.classList.remove('active');
       renderAdminTable();
-      renderPublicShop(); // Mettre à jour la boutique aussi
+      renderPublicShop();
     });
-
   </script>
 </body>
 </html>
