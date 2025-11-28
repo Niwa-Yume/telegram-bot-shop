@@ -5,7 +5,7 @@
 */
 (function(){
   'use strict';
-
+/*
   // --- Déplacer les fallbacks ici (au lieu de scripts inline bloqués par CSP) ---
   if(typeof window.__FALLBACK_CONFIG === 'undefined'){
     window.__FALLBACK_CONFIG = {
