@@ -1,161 +1,67 @@
-<!DOCTYPE html>
+<!-- Fichier: `admin/index.html` -->
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Admin</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin - Telegram Bot Shop</title>
   <style>
-    /* Reset de base */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000; /* conforme à la capture */
-      color: #ddd;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      -webkit-text-size-adjust: 100%;
-      overflow-x: hidden; /* empêche tout débordement horizontal */
-    }
-
-    /* Wrapper applique les safe-area insets pour iPhone */
-    .app {
-      min-height: 100%;
-      padding-top: env(safe-area-inset-top, 20px);
-      padding-left: calc(env(safe-area-inset-left, 0px) + 16px);
-      padding-right: calc(env(safe-area-inset-right, 0px) + 16px);
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Conteneur central adaptatif : ne dépasse jamais la zone visible */
-    .container {
-      width: 100%;
-      max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 32px);
-      margin: 18px auto;
-    }
-
-    /* Card style */
-    .card {
-      background: transparent;
-      border: 2px solid rgba(255,255,255,0.35);
-      border-radius: 8px;
-      padding: 18px;
-      min-height: 140px;
-      box-shadow: none;
-      color: rgba(255,255,255,0.85);
-      overflow: hidden; /* empêche le contenu de dépasser visuellement */
-    }
-
-    /* Assure que tous les champs respectent la largeur */
-    .card .field {
-      display: block;
-      width: 100%;
-      max-width: 100%;
-      margin: 8px 0;
-      word-break: break-word;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 6px;
-    }
-
-    .value {
-      font-size: 16px;
-      color: rgba(255,255,255,0.65);
-    }
-
-    /* Si vous avez un textarea ou input large */
-    textarea, input[type="text"] {
-      width: 100%;
-      max-width: 100%;
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.85);
-      padding: 10px;
-      border-radius: 6px;
-      resize: vertical;
-    }
-
-    /* Empêche les éléments inline d'étendre la page */
-    img, svg {
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* Petite mise en page pour le header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .title {
-      text-align: center;
-      font-weight: 600;
-      font-size: 20px;
-    }
-
-    /* Responsive : réduit le padding sur petits écrans */
-    @media (max-width: 420px) {
-      .container { margin: 12px; }
-      .card { padding: 14px; min-height: 120px; }
-      .title { font-size: 18px; }
+    :root{--bg:#000;--card:#0b0b0b;--text:#e8e8e8;--muted:#888}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{max-width:900px;margin:20px auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+    .title{font-size:20px;font-weight:600}
+    .card{background:var(--card);border:1px solid #444;border-radius:8px;padding:18px;min-height:160px}
+    label{display:block;color:var(--muted);margin-top:8px}
+    .field{margin:6px 0;padding:10px;border-radius:6px;background:#000;border:1px solid #333;color:var(--text)}
+    .btn{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:8px;background:#0b84ff;color:#fff;text-decoration:none}
+    /* mobile-friendly */
+    @media(max-width:600px){
+      .wrap{margin:12px;padding:12px}
+      .title{text-align:center;flex:1}
+      header{gap:8px}
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="container" role="main">
-      <div class="header" aria-hidden="true">
-        <div class="title">ProtoVert</div>
-      </div>
+  <div class="wrap">
+    <header>
+      <a href="/" aria-label="Retour" style="color:#0b84ff;text-decoration:none">Fermer</a>
+      <div class="title">ProtoVert — admin</div>
+      <nav>
+        <!-- Important: utilisez des URLs absolues commençant par slash -->
+        <a href="/admin" style="color:#0b84ff;text-decoration:none">Admin</a>
+      </nav>
+    </header>
 
-      <section class="card" aria-labelledby="card-title">
-        <h2 id="card-title" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Informations</h2>
+    <main>
+      <section class="card" role="region" aria-label="Administration">
+        <label>Code:</label>
+        <div class="field" id="admin-code">—</div>
 
-        <div class="field">
-          <label>Code:</label>
-          <div class="value" id="code">—</div>
-        </div>
+        <label>ID:</label>
+        <div class="field" id="admin-id">—</div>
 
-        <div class="field">
-          <label>ID:</label>
-          <div class="value" id="id">—</div>
-        </div>
-
-        <!-- exemple textarea (si nécessaire) -->
-        <div class="field">
-          <label>Notes:</label>
-          <textarea rows="4" placeholder="Saisir une note..."></textarea>
-        </div>
+        <a class="btn" href="/admin">Recharger / Admin</a>
       </section>
-    </div>
+    </main>
   </div>
 
   <script>
-    // Exemple : injecter dynamiquement des valeurs sans provoquer de débordement
-    (function(){
-      function setSafeText(id, text) {
-        var el = document.getElementById(id);
-        if(!el) return;
-        // échappe les retours chariot et tronque si trop long (optionnel)
-        var safe = String(text || '').replace(/\\n/g, ' ');
-        if (safe.length > 200) safe = safe.slice(0, 200) + '…';
-        el.textContent = safe;
-      }
-
-      // Remplacez par vos valeurs réelles
-      setSafeText('code', 'Exemple-de-code-12345');
-      setSafeText('id', 'ID-987654321');
-    })();
+    // Demo: récupérer des paramètres ou afficher fallback
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code') || 'vide';
+    const id = params.get('id') || 'inconnu';
+    document.getElementById('admin-code').textContent = code;
+    document.getElementById('admin-id').textContent = id;
   </script>
 </body>
 </html>
+
+<!-- Fichier optionnel: `vercel.json` (si vous gardez `admin.html` à la racine au lieu d'un dossier) -->
+{
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/:path*", "destination": "/admin/:path*" }
+  ]
+}
