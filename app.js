@@ -17,6 +17,7 @@
       messageTemplate: 'Bonjour, je suis intéressé par {{name}} (ID {{id}}) — {{tier}} à {{tierPrice}}.'
     };
   }
+  /*
   if(typeof window.__FALLBACK_CATALOG === 'undefined'){
     window.__FALLBACK_CATALOG = {
       products: [
@@ -26,7 +27,7 @@
       ]
     };
   }
-
+*/
   // Harmonisation dynamique de l'accent sans script inline
   document.addEventListener('DOMContentLoaded',()=>{
     const a = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#24cfff';
