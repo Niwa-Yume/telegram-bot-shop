@@ -358,12 +358,41 @@
     });
 
     // Sauvegarder
-    document.getElementById('btnSave').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify({products: state.products}, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'catalog.json';
-      a.click();
+    document.getElementById('btnSave').addEventListener('click', async () => {
+      const btn = document.getElementById('btnSave');
+      const originalText = btn.innerText;
+
+      // Feedback visuel immédiat
+      btn.innerText = '⏳ Sauvegarde...';
+      btn.disabled = true;
+
+      try {
+        // Envoi des données au script Python server.py
+        const response = await fetch('/api/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ products: state.products }) // On envoie l'état actuel
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert('✅ ' + result.message);
+
+          // On met aussi à jour le backup navigateur par sécurité
+          if(typeof saveToBrowser === 'function') saveToBrowser();
+
+        } else {
+          throw new Error('Le serveur a refusé la sauvegarde');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ Erreur de connexion au serveur.\n\nAssurez-vous que le fichier "server.py" est bien lancé dans votre terminal !');
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
     });
 
     // Importer
